@@ -65,7 +65,7 @@ ${BASE_DIR}/scripts/activity-summary.sh > /dev/null || true
 
 } > "$REPORT_FILE"
 
-# 3. DELIVER TO USER
+# 3. DELIVER TO OWNER
 bash "${BASE_DIR}/scripts/utils/send_alert.sh" "$REPORT_FILE"
 
 echo "Executive summary delivered."

@@ -77,7 +77,7 @@ CRON_JOBS=$(crontab -l 2>/dev/null | grep -v "^#" | grep -c "security-check\|act
 if [ "$CRON_JOBS" -gt 0 ]; then
     echo "  ✅ $CRON_JOBS monitoring job(s) scheduled" >> "$REPORT_FILE"
 else
-    echo "  ⚠️  No monitoring cron jobs found (using ChiefOS cron instead?)" >> "$REPORT_FILE"
+    echo "  ⚠️  No monitoring cron jobs found — run install.sh to configure crontab" >> "$REPORT_FILE"
 fi
 echo "" >> "$REPORT_FILE"
 

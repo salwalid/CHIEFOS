@@ -84,8 +84,8 @@ if [ $PERM_ISSUES -gt 0 ]; then
 fi
 echo "" >> "$REPORT_FILE"
 
-# Check 7: ChiefOS Gateway status
-echo "📌 ChiefOS Gateway:" >> "$REPORT_FILE"
+# Check 7: Agent Gateway status
+echo "📌 Agent Gateway:" >> "$REPORT_FILE"
 if pgrep -f "${COS_USER:-chiefos}.*gateway" > /dev/null; then
     echo "  ✅ Running" >> "$REPORT_FILE"
     GATEWAY_PID=$(pgrep -f "${COS_USER:-chiefos}.*gateway" | head -1)

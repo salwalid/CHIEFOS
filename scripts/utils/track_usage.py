@@ -1,18 +1,22 @@
 import sqlite3
 import json
 import os
+import shutil
 import subprocess
 from datetime import datetime
 
 DB_PATH = os.path.join(os.environ.get("BASE_DIR", "/home/chiefos/chiefos"), os.environ.get("DB_NAME", "chiefos.db"))
 
 def get_session_stats():
-    # Attempt to get status via agent CLI (chiefos or compatible)
+    # Attempt to get status via agent CLI — set AGENT_CLI in config.env (e.g. AGENT_CLI=my-agent)
+    agent_cli = os.environ.get("AGENT_CLI", "")
+    if not agent_cli or not shutil.which(agent_cli):
+        return None
     try:
-        result = subprocess.run(['chiefos', 'status', '--json']  # chiefos or your agent CLI if shutil.which('chiefos') else ['echo', '{}'], capture_output=True, text=True)
+        result = subprocess.run([agent_cli, 'status', '--json'], capture_output=True, text=True)
         if result.returncode == 0:
             return json.loads(result.stdout)
-    except:
+    except Exception:
         pass
     return None
 

@@ -135,8 +135,8 @@ mkdir -p "$LOGS_DIR"
     free -h | grep "Mem:" | awk '{print "   " $3 " used of " $2 " (" int($3/$2*100) "% full)"}'
     echo ""
     
-    # ChiefOS Gateway
-    echo "🤖 ChiefOS Gateway:"
+    # Agent Gateway
+    echo "🤖 Agent Gateway:"
     if pgrep -f "${COS_USER:-chiefos}.*gateway" > /dev/null; then
         GATEWAY_PID=$(pgrep -f "${COS_USER:-chiefos}.*gateway" | head -1)
         echo "   ✅ Running (PID: $GATEWAY_PID)"
@@ -186,12 +186,12 @@ mkdir -p "$LOGS_DIR"
     
     echo ""
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo "Next report: $(date -d "next Monday 9:00 $TZ" '+%A, %B %d at %I:%M %p %Z' 2>/dev/null || echo 'Monday 9:00 AM EST')"
+    echo "Next report: $(TZ="${TZ:-UTC}" date -d "next Monday 9:00" '+%A, %B %d at %I:%M %p %Z' 2>/dev/null || echo 'Monday 9:00 AM')"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     
 } > "$REPORT_FILE"
 
-# Send to Telegram via ChiefOS CLI (as ${COS_USER} user)
+# Send via alert script
 bash "${BASE_DIR}/scripts/utils/send_alert.sh" "$REPORT_FILE"
 
 # Archive report

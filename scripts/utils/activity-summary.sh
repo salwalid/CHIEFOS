@@ -47,8 +47,8 @@ echo "📌 Memory Usage:" >> "$REPORT_FILE"
 free -h | grep "Mem:" | awk '{print "  " $3 " used of " $2}' >> "$REPORT_FILE"
 echo "" >> "$REPORT_FILE"
 
-# ChiefOS process info
-echo "📌 ChiefOS Process:" >> "$REPORT_FILE"
+# Agent gateway process info
+echo "📌 Agent Gateway:" >> "$REPORT_FILE"
 if pgrep -f "${COS_USER:-chiefos}.*gateway" > /dev/null; then
     GATEWAY_PID=$(pgrep -f "${COS_USER:-chiefos}.*gateway" | head -1)
     echo "  PID: $GATEWAY_PID" >> "$REPORT_FILE"

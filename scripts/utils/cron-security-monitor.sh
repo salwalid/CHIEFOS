@@ -70,8 +70,8 @@ if [ "$NOTIFICATION_TYPE" != "NONE" ]; then
         } > "$NOTIF_FILE"
     fi
     
-    # Send via ChiefOS message tool
-    # Note: This requires ChiefOS gateway to be running
+    # Send via alert script
+    # Note: This requires send_alert.sh to be configured
     "$SCRIPTS_DIR/send_alert.sh" "$NOTIF_FILE" 2>&1 >> "$REPORT_FILE" || {
         echo "⚠️  Failed to send Telegram notification" >> "$REPORT_FILE"
     }

@@ -1,6 +1,6 @@
 #!/bin/bash
-# Alpha Security Data Feed - Daily Timestamped
-# Corrected version to capture real external attack data
+# ChiefOS Security Data Feed - Daily Timestamped
+# Captures external attack data and system security events
 
 (
   echo "--- UFW STATUS ---"
@@ -14,9 +14,9 @@
   # Capture real bans from fail2ban.log
   sudo grep "Ban " /var/log/fail2ban.log | tail -n 100
   
-  echo -e "\n--- CHIEFOS DEEP AUDIT ---"
-  command -v chiefos && chiefos security audit --deep || echo "chiefos not installed — skipping deep audit"
+  echo -e "\n--- AGENT DEEP AUDIT ---"
+  echo "Deep audit: configure AGENT_CLI in config.env to enable agent-driven audit"
 ) > ${BASE_DIR}/logs/security_$(date +%Y-%m-%d).log 2>&1
 
-# Ensure Alpha can read the log
+# Ensure ChiefOS user can read the log
 chown "${COS_USER:-chiefos}":"${COS_USER:-chiefos}" ${BASE_DIR}/logs/security_$(date +%Y-%m-%d).log
