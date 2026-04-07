@@ -150,6 +150,85 @@ tail -50 $BASE_DIR/logs/cron.log
 
 ---
 
+## Step 6.5 — Set Up Obsidian Wiki Visualization (Optional but Recommended)
+
+The wiki lives as markdown files on your server. Obsidian lets you browse it visually on your local machine — with a graph view showing how all pages connect, live link navigation, and full-text search.
+
+### Part A — Install rclone (syncs wiki to cloud)
+
+On your server:
+```bash
+# Install rclone
+curl https://rclone.org/install.sh | sudo bash
+
+# Configure your cloud provider (Google Drive, Dropbox, S3, etc.)
+rclone config
+# → Choose "n" for new remote
+# → Give it a name: gdrive (or dropbox, etc.)
+# → Follow the prompts for your provider
+# → When done, test: rclone ls gdrive:
+```
+
+Then add to `config.env`:
+```bash
+RCLONE_REMOTE=gdrive                  # name you gave during rclone config
+RCLONE_WIKI_PATH=MyDrive/ChiefOS      # folder path in your cloud storage
+```
+
+ChiefOS will sync `wiki/` and `raw/` to the cloud every 15 minutes automatically via cron.
+
+Manual sync at any time:
+```bash
+source $BASE_DIR/.env
+bash $BASE_DIR/scripts/wiki/sync_wiki.sh
+```
+
+### Part B — Set Up Obsidian
+
+1. Download [Obsidian](https://obsidian.md/) on your Mac/PC/phone — it's free
+2. Install [Google Drive for Desktop](https://www.google.com/drive/download/) (or your cloud app) so the synced folder appears locally
+3. In Obsidian: **File → Open Vault** → navigate to your synced `wiki/` folder → **Open**
+
+That's it. Obsidian will index all your wiki pages and you'll have:
+- **Graph View** (left sidebar `Ctrl+G`) — visual map of all pages and their connections
+- **Backlinks** — see what links to any page
+- **Live `[[link]]` navigation** — click any link to jump to that page
+
+### Part C — Recommended Obsidian Plugins
+
+In Obsidian: **Settings → Community Plugins → Browse**
+
+| Plugin | Why |
+|---|---|
+| **Dataview** | Query wiki pages by frontmatter tags — e.g. show all `category: research` pages sorted by date |
+| **Obsidian Web Clipper** | Browser extension — clips any web article to your `raw/` folder in one click |
+
+### Using the Wiki
+
+**Add a new source:**
+```bash
+# Option 1: Drop a file directly into raw/
+cp ~/Downloads/article.md $BASE_DIR/raw/
+
+# Option 2: Use Obsidian Web Clipper in your browser → saves to raw/ via cloud sync
+
+# Then tell your agent:
+# "Ingest $BASE_DIR/raw/article.md into the wiki"
+```
+
+**Search the wiki:**
+```bash
+source $BASE_DIR/.env
+bash $BASE_DIR/scripts/wiki/search_wiki.sh "mortgage rates"
+```
+
+**Lint (health check):**
+```bash
+bash $BASE_DIR/scripts/wiki/lint_wiki.sh
+```
+
+---
+
 ## Step 7 — Configure Your AI Agent
 
 Point your AI platform to ChiefOS:

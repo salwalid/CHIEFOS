@@ -114,6 +114,44 @@ See `docs/CONFIGURATION.md` for every variable.
 
 ---
 
+## Wiki Knowledge Base + Obsidian
+
+ChiefOS includes a persistent, compounding knowledge base your agent maintains over time.
+
+```
+$BASE_DIR/
+├── wiki/       ← agent-maintained pages (cross-linked markdown)
+└── raw/        ← drop source files here for ingestion
+```
+
+**How it works:**
+1. Drop any file (article, report, transcript, notes) into `raw/`
+2. Tell your agent: *"Ingest raw/filename.md into the wiki"*
+3. The agent reads it, writes wiki pages, updates cross-links and the index
+4. Knowledge compounds — every ingest makes the whole wiki richer
+
+**Visualization via Obsidian:**
+Point [Obsidian](https://obsidian.md/) at your synced `wiki/` folder to get a full graph view of how all your knowledge connects. Enable **rclone sync** in `config.env` to keep it in sync automatically.
+
+```
+Agent writes → server wiki/ → rclone → cloud storage → Obsidian (your device)
+```
+
+**Wiki tools:**
+```bash
+bash scripts/wiki/ingest_prep.sh <filename>    # preview + log a source
+bash scripts/wiki/search_wiki.sh <query>       # search all pages
+bash scripts/wiki/lint_wiki.sh                 # audit health
+bash scripts/wiki/sync_wiki.sh                 # manual sync to cloud
+```
+
+Already have ChiefOS or OpenClaw installed? Add the wiki with one command:
+```bash
+bash wiki-install.sh
+```
+
+---
+
 ## Existing OpenClaw Users
 
 If you have an existing OpenClaw workspace, the installer detects it and runs `openclaw/patch_openclaw.sh` instead of a fresh install. Your agent identity is preserved — ChiefOS only adds the governance layer and schema.

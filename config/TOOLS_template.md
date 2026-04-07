@@ -400,3 +400,11 @@ bash $BASE_DIR/scripts/wiki/search_wiki.sh "mortgage rates"
 ```bash
 bash wiki-install.sh
 ```
+
+**Sync wiki to cloud for Obsidian visualization:**
+```bash
+bash $BASE_DIR/scripts/wiki/sync_wiki.sh
+```
+Requires `RCLONE_REMOTE` and `RCLONE_WIKI_PATH` set in `.env`.
+Runs automatically every 15 minutes via cron when configured.
+Open the synced `wiki/` folder as an Obsidian vault on your local machine for full graph view.

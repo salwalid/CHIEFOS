@@ -601,6 +601,16 @@ PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 */30 * * * * cd $BASE_DIR && source .env && python3 scripts/utils/check_emails.py >> logs/email_check.log 2>&1
 CRONTAB
 
+# Append wiki sync to crontab if rclone is configured
+if [[ -n "${RCLONE_REMOTE:-}" && -n "${RCLONE_WIKI_PATH:-}" ]]; then
+    echo "" >> "$CRON_FILE"
+    echo "# --- Wiki Cloud Sync (every 15 minutes) ---" >> "$CRON_FILE"
+    echo "*/15 * * * * cd $BASE_DIR && bash scripts/wiki/sync_wiki.sh >> logs/wiki_sync.log 2>&1" >> "$CRON_FILE"
+    ok "Wiki sync cron added (every 15 min → ${RCLONE_REMOTE}:${RCLONE_WIKI_PATH})"
+else
+    warn "RCLONE_REMOTE not set — wiki cloud sync skipped. Configure rclone later and re-run install.sh"
+fi
+
 sudo crontab -u "$COS_USER" "$CRON_FILE"
 rm "$CRON_FILE"
 

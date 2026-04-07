@@ -62,6 +62,42 @@ Angel is the authorization layer. She runs as a separate OS user (`angel`) with 
 
 ---
 
+## Wiki Cloud Sync — Obsidian Access (Optional)
+
+Syncs your wiki to cloud storage so you can browse it in Obsidian on any device.
+Requires [rclone](https://rclone.org/install/) installed and a remote configured (`rclone config`).
+
+| Variable | Required | Example | Description |
+|---|---|---|---|
+| `RCLONE_REMOTE` | — | `gdrive` | Name of your rclone remote (set during `rclone config`) |
+| `RCLONE_WIKI_PATH` | — | `MyDrive/ChiefOS` | Folder path in cloud storage. Wiki syncs to `.../wiki/`, raw sources to `.../raw/` |
+
+**Setup flow:**
+```bash
+# 1. Install rclone
+curl https://rclone.org/install.sh | sudo bash
+
+# 2. Configure your cloud provider (Google Drive, Dropbox, etc.)
+rclone config
+# Follow prompts → give the remote a name (e.g. "gdrive") → authenticate
+
+# 3. Set in config.env
+RCLONE_REMOTE=gdrive
+RCLONE_WIKI_PATH=MyDrive/ChiefOS
+
+# 4. In Obsidian: File → Open Vault → point to your synced wiki/ folder
+```
+
+Once configured, ChiefOS syncs `wiki/` and `raw/` to the cloud every 15 minutes via cron.
+The agent writes on the server; you read and explore in Obsidian on your local machine.
+
+**Obsidian tips:**
+- Enable the **Graph View** (left sidebar) to visualize how pages link to each other
+- Install the **Dataview** plugin to query wiki pages by frontmatter tags
+- Install **Obsidian Web Clipper** (browser extension) to clip articles directly to `raw/`
+
+---
+
 ## Twilio (Optional)
 
 Only required if you want to use `make-call.sh` for phone call alerts.
