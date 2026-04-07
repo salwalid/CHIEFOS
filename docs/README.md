@@ -4,6 +4,8 @@
 
 ChiefOS gives your AI agent a complete operational backbone: a structured SQLite database, real-time dashboards, scheduled alerts, email monitoring, and a governance layer — all running on your own server.
 
+<!-- [Screenshot: HQ Briefing Dashboard] -->
+
 ---
 
 ## What It Does
@@ -32,7 +34,7 @@ nano config.env
 bash install.sh
 ```
 
-That's it. The installer handles users, directories, database, dashboards, Angel, and crontab.
+That's it. The installer handles users, directories, database, dashboards, Angel, Nginx, and crontab. Takes 5–10 minutes. See `docs/SETUP.md` for a full walkthrough including a prerequisite checklist.
 
 ---
 

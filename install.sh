@@ -606,6 +606,70 @@ sudo sed -i \
 ok "Log rotation configured (14 days, daily, compressed)"
 
 # -------------------------------------------------------
+# FINAL HEALTH CHECK
+# -------------------------------------------------------
+step "Final health check"
+
+HEALTH_ISSUES=0
+
+# Web UI reachable via Nginx
+if curl -sf --max-time 5 "http://127.0.0.1/HQ/" > /dev/null 2>&1; then
+    ok "Web UI reachable at http://$BASE_URL/HQ/"
+else
+    warn "Web UI not yet reachable locally — Nginx may need a moment"
+    warn "Check with: sudo systemctl status nginx"
+    HEALTH_ISSUES=$((HEALTH_ISSUES + 1))
+fi
+
+# Angel MCP endpoint
+if curl -sf --max-time 5 "http://127.0.0.1:$ANGEL_PORT/mcp" > /dev/null 2>&1; then
+    ok "Angel MCP endpoint responding at http://127.0.0.1:$ANGEL_PORT/mcp"
+else
+    warn "Angel MCP endpoint not yet responding"
+    warn "Check with: sudo -u angel pm2 list"
+    HEALTH_ISSUES=$((HEALTH_ISSUES + 1))
+fi
+
+# Database tables
+TABLE_COUNT=$(sqlite3 "$DB_PATH" "SELECT count(*) FROM sqlite_master WHERE type='table';" 2>/dev/null || echo 0)
+if [[ "$TABLE_COUNT" -ge 25 ]]; then
+    ok "Database: $TABLE_COUNT tables confirmed"
+else
+    warn "Database has only $TABLE_COUNT tables — expected 25+"
+    warn "Re-run: bash $CHIEFOS_SRC/setup/verify_db.sh $DB_PATH"
+    HEALTH_ISSUES=$((HEALTH_ISSUES + 1))
+fi
+
+# Crontab installed
+CRON_FINAL=$(sudo crontab -u "$COS_USER" -l 2>/dev/null | grep -v "^#" | grep -v "^$" | wc -l || echo 0)
+if [[ "$CRON_FINAL" -ge 10 ]]; then
+    ok "Crontab: $CRON_FINAL jobs scheduled"
+else
+    warn "Crontab has only $CRON_FINAL active jobs — check: sudo crontab -u $COS_USER -l"
+    HEALTH_ISSUES=$((HEALTH_ISSUES + 1))
+fi
+
+# Dashboard data files
+JSON_FINAL=$(find "$BASE_DIR/www/HQ" -name "*.json" 2>/dev/null | wc -l || echo 0)
+if [[ "$JSON_FINAL" -ge 3 ]]; then
+    ok "Dashboard data: $JSON_FINAL JSON files present"
+else
+    warn "Dashboard data files missing — run hydration manually:"
+    warn "  sudo -u $COS_USER bash $BASE_DIR/scripts/core/master_hydration.sh"
+    HEALTH_ISSUES=$((HEALTH_ISSUES + 1))
+fi
+
+if [[ "$HEALTH_ISSUES" -eq 0 ]]; then
+    ok "All health checks passed — system is operational"
+else
+    warn "$HEALTH_ISSUES health check(s) need attention — see warnings above"
+fi
+
+echo ""
+echo "  Logs directory: $BASE_DIR/logs/"
+echo "  Re-check health at any time: bash verify-install.sh"
+
+# -------------------------------------------------------
 # FINAL SUMMARY
 # -------------------------------------------------------
 echo ""

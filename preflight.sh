@@ -18,8 +18,15 @@ CONFIG_FILE="$(dirname "$0")/config.env"
 if [[ -f "$CONFIG_FILE" ]]; then
     source "$CONFIG_FILE"
 else
-    echo "${WARN} config.env not found — copy config.env.template and fill it in first."
+    echo "${FAIL} config.env not found."
+    echo ""
+    echo "  Create it from the template:"
     echo "    cp config.env.template config.env"
+    echo "    nano config.env"
+    echo ""
+    echo "  Or run the installer directly — it will prompt you interactively:"
+    echo "    bash install.sh"
+    echo ""
     exit 1
 fi
 
