@@ -1,0 +1,13 @@
+# ChiefOS Log Rotation
+# Installed to /etc/logrotate.d/chiefos by install.sh
+
+CHIEFOS_LOGS_DIR/*.log {
+    daily
+    rotate 14
+    compress
+    delaycompress
+    missingok
+    notifempty
+    create 0640 CHIEFOS_USER CHIEFOS_USER
+    sharedscripts
+}

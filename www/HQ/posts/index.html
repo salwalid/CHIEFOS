@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Post Command Center | ChiefOS HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Serif+Display&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0b0e15;
+  --surface: #12151e;
+  --panel: #181c28;
+  --border: #222840;
+  --border-hi: #2e3650;
+  --accent: #f59e0b;
+  --accent-dim: rgba(245,158,11,0.08);
+  --green: #34d399;
+  --green-dim: rgba(52,211,153,0.08);
+  --blue: #60a5fa;
+  --blue-dim: rgba(96,165,250,0.08);
+  --text: #8492b4;
+  --text-mid: #a8b8d8;
+  --text-bright: #e4ecff;
+  --mono: 'DM Mono', monospace;
+  --serif: 'DM Serif Display', serif;
+  --sans: 'Outfit', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh;
+  background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(245,158,11,0.03) 0%, transparent 60%);
+}
+.header {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(11,14,21,0.92); backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 24px; display: flex; align-items: center; gap: 16px;
+}
+.header-back { color: var(--accent); text-decoration: none; font-size: 20px; transition: opacity 0.2s; }
+.header-back:hover { opacity: 0.7; }
+.header-info { flex: 1; }
+.header-title { font-family: var(--serif); font-size: 18px; color: var(--text-bright); }
+.header-sub { font-family: var(--mono); font-size: 10px; color: var(--text); letter-spacing: 0.1em; margin-top: 1px; }
+.stats-bar { display: flex; gap: 6px; }
+.stat {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em;
+  padding: 4px 10px; border-radius: 4px; border: 1px solid var(--border);
+}
+.stat-draft { color: var(--accent); background: var(--accent-dim); border-color: rgba(245,158,11,0.2); }
+.stat-published { color: var(--green); background: var(--green-dim); border-color: rgba(52,211,153,0.2); }
+.stat-total { color: var(--text-mid); }
+.filter-bar {
+  display: flex; gap: 8px; padding: 14px 24px;
+  border-bottom: 1px solid var(--border); flex-wrap: wrap; align-items: center;
+}
+.fbtn {
+  font-family: var(--mono); font-size: 11px; padding: 5px 14px;
+  border-radius: 4px; border: 1px solid var(--border);
+  background: transparent; color: var(--text); cursor: pointer;
+  transition: all 0.15s; letter-spacing: 0.06em;
+}
+.fbtn:hover { border-color: var(--border-hi); color: var(--text-mid); }
+.fbtn.on { background: var(--accent-dim); border-color: rgba(245,158,11,0.3); color: var(--accent); }
+.filter-spacer { flex: 1; }
+.search-box {
+  font-family: var(--mono); font-size: 11px; padding: 5px 12px;
+  border-radius: 4px; border: 1px solid var(--border);
+  background: var(--surface); color: var(--text-mid); width: 200px;
+  outline: none; transition: border-color 0.15s;
+}
+.search-box:focus { border-color: var(--accent); }
+.search-box::placeholder { color: var(--text); opacity: 0.5; }
+.posts { padding: 16px 24px; max-width: 1100px; }
+.post {
+  background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+  margin-bottom: 8px; overflow: hidden; transition: border-color 0.15s;
+}
+.post:hover { border-color: var(--border-hi); }
+.post.open { border-color: rgba(245,158,11,0.3); }
+.post-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 14px; cursor: pointer; user-select: none;
+}
+.p-id {
+  font-family: var(--mono); font-size: 10px; color: var(--text);
+  background: var(--surface); padding: 2px 6px; border-radius: 3px;
+  min-width: 30px; text-align: center;
+}
+.p-title {
+  flex: 1; font-size: 13px; font-weight: 500; color: var(--text-bright);
+  line-height: 1.4; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.p-platform {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.08em;
+  padding: 2px 6px; border-radius: 3px; background: var(--surface); color: var(--text);
+}
+.p-date { font-family: var(--mono); font-size: 10px; color: var(--text); min-width: 78px; text-align: right; }
+.p-added { font-family: var(--mono); font-size: 10px; color: var(--text); min-width: 78px; text-align: right; }
+.p-status {
+  font-family: var(--mono); font-size: 10px; font-weight: 500;
+  padding: 3px 10px; border-radius: 4px; letter-spacing: 0.08em;
+  min-width: 76px; text-align: center;
+}
+.s-Draft     { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(245,158,11,0.25); }
+.s-Published { background: var(--green-dim); color: var(--green); border: 1px solid rgba(52,211,153,0.25); }
+.s-Posted    { background: rgba(96,165,250,0.08); color: var(--blue); border: 1px solid rgba(96,165,250,0.25); }
+.s-Retired   { background: rgba(100,100,120,0.1); color: #6b7280; border: 1px solid rgba(100,100,120,0.2); }
+.p-arrow {
+  color: var(--text); font-size: 12px; transition: transform 0.2s;
+  width: 16px; text-align: center;
+}
+.post.open .p-arrow { transform: rotate(90deg); color: var(--accent); }
+.post-body { display: none; border-top: 1px solid var(--border); padding: 14px; }
+.post.open .post-body { display: block; }
+.field { margin-bottom: 10px; }
+.field:last-child { margin-bottom: 0; }
+.field-label {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.15em;
+  color: var(--text); text-transform: uppercase; margin-bottom: 4px;
+}
+.field-value {
+  font-size: 13px; color: var(--text-mid); line-height: 1.65;
+  border-left: 2px solid var(--border); padding-left: 12px;
+}
+.field-value.title-val {
+  font-family: var(--serif); font-size: 17px; color: var(--text-bright);
+  border-left: 2px solid var(--accent); line-height: 1.35;
+}
+.field-value.hashtags-val {
+  font-family: var(--mono); font-size: 11px; color: var(--accent); line-height: 1.8;
+  border-left: 2px solid rgba(245,158,11,0.3);
+}
+.field-meta {
+  display: flex; gap: 16px; flex-wrap: wrap;
+  font-family: var(--mono); font-size: 10px; color: var(--text);
+  padding: 10px 12px; background: var(--surface); border-radius: 6px;
+  border: 1px solid var(--border);
+}
+.meta-item span { color: var(--text-mid); }
+.empty-state {
+  text-align: center; padding: 60px 20px;
+  font-family: var(--mono); font-size: 12px; color: var(--text);
+}
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 2px; }
+@media (max-width: 768px) {
+  .header { padding: 12px 14px; gap: 10px; }
+  .stats-bar { display: none; }
+  .filter-bar { padding: 10px 14px; }
+  .posts { padding: 10px 14px; }
+  .post-row { gap: 6px; padding: 10px; }
+  .p-platform, .p-date { display: none; }
+  .p-title { white-space: normal; }
+  .search-box { width: 140px; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a href="/HQ/" class="header-back">←</a>
+  <div class="header-info">
+    <div class="header-title">Post Command Center</div>
+    <div class="header-sub">CHIEFOS HQ · LINKEDIN ARCHIVE</div>
+  </div>
+  <div class="stats-bar" id="stats"></div>
+</div>
+
+<div class="filter-bar">
+  <button class="fbtn on" onclick="setFilter('all',this)">All</button>
+  <button class="fbtn" onclick="setFilter('Draft',this)">Draft</button>
+  <button class="fbtn" onclick="setFilter('Published',this)">Published</button>
+  <button class="fbtn" onclick="setFilter('Posted',this)">Posted</button>
+  <button class="fbtn" onclick="setFilter('Retired',this)">Retired</button>
+  <div class="filter-spacer"></div>
+  <input class="search-box" type="text" placeholder="Search posts..." oninput="setSearch(this.value)">
+</div>
+
+<div class="posts" id="posts"></div>
+
+<script>
+let allPosts = [];
+let currentFilter = 'all';
+let currentSearch = '';
+
+async function loadPosts() {
+  try {
+    const resp = await fetch('posts_data.json?t=' + Date.now());
+    const data = await resp.json();
+    allPosts = data.posts || [];
+    renderStats();
+    renderPosts();
+  } catch (e) {
+    document.getElementById('posts').innerHTML = '<div class="empty-state">❌ Failed to load posts data.</div>';
+  }
+}
+
+function renderStats() {
+  const total = allPosts.length;
+  const drafts   = allPosts.filter(p => (p.status || '').toUpperCase() === 'DRAFT').length;
+  const pub      = allPosts.filter(p => (p.status || '').toUpperCase() === 'PUBLISHED').length;
+  const posted   = allPosts.filter(p => (p.status || '').toUpperCase() === 'POSTED').length;
+  const retired  = allPosts.filter(p => (p.status || '').toUpperCase() === 'RETIRED').length;
+  document.getElementById('stats').innerHTML =
+    `<div class="stat stat-total">${total} Total</div>` +
+    `<div class="stat stat-draft">${drafts} Draft</div>` +
+    `<div class="stat stat-published">${pub} Published</div>` +
+    `<div class="stat" style="color:var(--blue);background:rgba(96,165,250,0.08);border-color:rgba(96,165,250,0.2)">${posted} Posted</div>` +
+    `<div class="stat" style="color:#6b7280;background:rgba(100,100,120,0.1);border-color:rgba(100,100,120,0.2)">${retired} Retired</div>`;
+}
+
+function setFilter(f, el) {
+  currentFilter = f;
+  document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('on'));
+  el.classList.add('on');
+  renderPosts();
+}
+
+function setSearch(q) {
+  currentSearch = q.toLowerCase();
+  renderPosts();
+}
+
+function togglePost(id) {
+  document.getElementById('post-' + id).classList.toggle('open');
+}
+
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function fieldHtml(label, value, cls) {
+  if (!value) return '';
+  return '<div class="field"><div class="field-label">' + label + '</div><div class="field-value ' + (cls||'') + '">' + esc(value) + '</div></div>';
+}
+
+function renderPosts() {
+  const isRetired = currentFilter.toUpperCase() === 'RETIRED';
+
+  // Hide retired by default; show only retired when filter is Retired
+  let filtered = allPosts.filter(p =>
+    isRetired
+      ? (p.status || '').toUpperCase() === 'RETIRED'
+      : (p.status || '').toUpperCase() !== 'RETIRED'
+  );
+
+  if (currentFilter !== 'all' && !isRetired) {
+    filtered = filtered.filter(p => (p.status || '').toUpperCase() === currentFilter.toUpperCase());
+  }
+  if (currentSearch) {
+    filtered = filtered.filter(p =>
+      Object.values(p).some(v => String(v).toLowerCase().includes(currentSearch))
+    );
+  }
+
+  // Sort newest to oldest
+  filtered.sort((a, b) => (b.post_date || '').localeCompare(a.post_date || ''));
+
+  if (!filtered.length) {
+    document.getElementById('posts').innerHTML = '<div class="empty-state">No posts match your filter.</div>';
+    return;
+  }
+
+  document.getElementById('posts').innerHTML = filtered.map(p => {
+    const date = (p.post_date || '').slice(0, 10);
+    const statusNorm = (p.status || '').charAt(0).toUpperCase() + (p.status || '').slice(1).toLowerCase();
+
+    // Expanded detail — show all available fields
+    let body = fieldHtml('Title', p.title, 'title-val');
+    body += fieldHtml('Opening', p.opening);
+    body += fieldHtml('Body', p.body);
+    body += fieldHtml('Takeaway', p.takeaway);
+    body += fieldHtml('Hashtags', p.hashtags, 'hashtags-val');
+
+    const metaParts = [];
+    metaParts.push('Platform: <span>' + esc(p.platform || 'LinkedIn') + '</span>');
+    metaParts.push('Status: <span>' + esc(statusNorm) + '</span>');
+    metaParts.push('Date: <span>' + esc(date || '—') + '</span>');
+    if (p.engine) metaParts.push('Engine: <span>' + esc(p.engine) + '</span>');
+    if (p.post_type) metaParts.push('Type: <span>' + esc(p.post_type) + '</span>');
+    if (p.created_at) metaParts.push('Created: <span>' + esc(p.created_at) + '</span>');
+
+    body += '<div class="field"><div class="field-label">Meta</div><div class="field-meta">' +
+      metaParts.map(m => '<div class="meta-item">' + m + '</div>').join('') +
+      '</div></div>';
+
+    return `<div class="post" id="post-${p.id}">
+      <div class="post-row" onclick="togglePost('${p.id}')">
+        <div class="p-added">${date}</div>
+        <div class="p-id">${p.id ? esc(String(p.id).padStart(2,'0')) : '—'}</div>
+        <div class="p-title">${esc(p.title)}</div>
+        <div class="p-platform">${esc(p.platform || 'LinkedIn')}</div>
+        <div class="p-status s-${statusNorm}">${statusNorm}</div>
+        <div class="p-arrow">▶</div>
+      </div>
+      <div class="post-body">${body}</div>
+    </div>`;
+  }).join('');
+}
+
+loadPosts();
+</script>
+</body>
+</html>

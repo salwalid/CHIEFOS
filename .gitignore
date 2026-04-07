@@ -1,0 +1,57 @@
+# =============================================================
+# ChiefOS .gitignore
+# =============================================================
+
+# ---- Credentials & Config (NEVER commit these) ----
+config.env
+.env
+*.env
+!config.env.template
+
+# ---- Database (contains personal data) ----
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# ---- Logs ----
+logs/
+*.log
+
+# ---- Runtime data ----
+memory/
+archives/
+
+# ---- Generated JSON data files (hydrated at runtime) ----
+www/HQ/**/*_data.json
+www/HQ/api/
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.pyc
+.Python
+venv/
+.venv/
+
+# ---- Node / Angel (built artifacts) ----
+node_modules/
+dist/
+
+# ---- OS files ----
+.DS_Store
+Thumbs.db
+
+# ---- Editor files ----
+.vscode/
+.idea/
+*.swp
+*~
+
+# ---- Backups created by patch_openclaw.sh ----
+backups/
+
+# ---- Temp ----
+*.tmp
+*.bak

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance | ChiefOS HQ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #0f172a; color: #f8fafc; font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .card { background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.05); border-radius: 1.5rem; padding: 1.5rem; }
+        .stat-card { background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.07); border-radius: 1.25rem; padding: 1.25rem 1.5rem; }
+        .section-title { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #64748b; margin-bottom: 0.75rem; }
+        .row-item { display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.85rem; }
+        .row-item:last-child { border-bottom: none; }
+        .badge { font-size: 0.6rem; padding: 2px 7px; border-radius: 4px; font-weight: 700; text-transform: uppercase; }
+        .badge-income { background: rgba(16,185,129,0.15); color: #10b981; }
+        .badge-expense { background: rgba(239,68,68,0.12); color: #ef4444; }
+        .badge-upcoming { background: rgba(245,158,11,0.15); color: #f59e0b; }
+        .badge-sub { background: rgba(56,189,248,0.12); color: #38bdf8; }
+        .amount-income { color: #10b981; font-weight: 600; font-variant-numeric: tabular-nums; }
+        .amount-expense { color: #ef4444; font-weight: 600; font-variant-numeric: tabular-nums; }
+        .amount-upcoming { color: #f59e0b; font-weight: 600; font-variant-numeric: tabular-nums; }
+        .amount-neutral { color: #94a3b8; font-weight: 600; font-variant-numeric: tabular-nums; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+    </style>
+</head>
+<body class="min-h-screen p-6">
+
+    <!-- Top Nav -->
+    <div class="max-w-7xl mx-auto mb-8 flex justify-between items-center">
+        <a href="/HQ/" class="text-sky-400 flex items-center hover:text-sky-300 transition text-sm">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Mission Control
+        </a>
+        <h1 class="text-xl font-bold tracking-tight text-white">Finance Command</h1>
+        <div class="text-slate-500 text-xs font-mono" id="syncTime">Loading...</div>
+    </div>
+
+    <div class="max-w-7xl mx-auto space-y-8">
+
+        <!-- Month label -->
+        <div class="flex items-center justify-between">
+            <div class="text-2xl font-black text-white uppercase tracking-wide" id="monthLabel">—</div>
+            <div class="flex items-center gap-2 text-xs text-slate-500">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse inline-block"></span>
+                Live · refreshes every 60s
+            </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="summaryCards">
+            <div class="stat-card">
+                <div class="section-title">Income</div>
+                <div class="text-2xl font-black amount-income" id="statIncome">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="section-title">Expenses</div>
+                <div class="text-2xl font-black amount-expense" id="statExpenses">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="section-title">Net</div>
+                <div class="text-2xl font-black" id="statNet">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="section-title">Monthly Sub Burn</div>
+                <div class="text-2xl font-black amount-neutral" id="statBurn">—</div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+            <!-- Upcoming Bills -->
+            <div class="card">
+                <div class="section-title">Upcoming Bills — Next 14 Days</div>
+                <div id="upcomingList"><div class="text-slate-500 text-sm py-4 text-center">No bills due in the next 14 days</div></div>
+            </div>
+
+            <!-- Active Subscriptions -->
+            <div class="card">
+                <div class="section-title">Active Subscriptions</div>
+                <div id="subsList"><div class="text-slate-500 text-sm py-4 text-center">No active subscriptions</div></div>
+            </div>
+
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+            <!-- Income This Month -->
+            <div class="card">
+                <div class="section-title">Income This Month</div>
+                <div id="incomeList"><div class="text-slate-500 text-sm py-4 text-center">No income recorded this month</div></div>
+            </div>
+
+            <!-- Expenses This Month -->
+            <div class="card">
+                <div class="section-title">Expenses This Month</div>
+                <div id="expenseList"><div class="text-slate-500 text-sm py-4 text-center">No expenses recorded this month</div></div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        function fmt(amount) {
+            return '$' + parseFloat(amount || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function renderList(containerId, rows, amountClass, labelFn, dateFn) {
+            const el = document.getElementById(containerId);
+            if (!rows || rows.length === 0) return;
+            el.innerHTML = rows.map(r => `
+                <div class="row-item">
+                    <div>
+                        <div class="text-white text-sm font-medium">${r.vendor || r.name || '—'}</div>
+                        <div class="text-slate-500 text-xs">${r.description || r.category || ''}</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="${amountClass}">${fmt(r.amount)}</div>
+                        <div class="text-slate-500 text-xs">${dateFn(r)}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderSubscriptions(subs) {
+            const el = document.getElementById('subsList');
+            if (!subs || subs.length === 0) return;
+            el.innerHTML = subs.map(r => `
+                <div class="row-item">
+                    <div>
+                        <div class="text-white text-sm font-medium">${r.name}</div>
+                        <div class="text-slate-500 text-xs">${r.frequency} · ${r.category || ''}</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="amount-neutral">${fmt(r.amount)}</div>
+                        <div class="text-slate-500 text-xs">next: ${r.next_due_date || '—'}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadAndRender() {
+            fetch('/HQ/finance/finance_data.json?t=' + Date.now())
+                .then(r => r.json())
+                .then(data => {
+                    document.getElementById('syncTime').textContent = 'Synced ' + data.sync_time;
+                    document.getElementById('monthLabel').textContent = data.month_name;
+
+                    const s = data.summary;
+                    document.getElementById('statIncome').textContent = fmt(s.income);
+                    document.getElementById('statExpenses').textContent = fmt(s.expenses);
+
+                    const netEl = document.getElementById('statNet');
+                    netEl.textContent = fmt(s.net);
+                    netEl.className = 'text-2xl font-black ' + (s.net >= 0 ? 'amount-income' : 'amount-expense');
+
+                    document.getElementById('statBurn').textContent = fmt(s.monthly_burn);
+
+                    renderList('upcomingList', data.upcoming, 'amount-upcoming',
+                        r => r.vendor, r => r.date);
+
+                    renderSubscriptions(data.subscriptions);
+
+                    renderList('incomeList', data.income, 'amount-income',
+                        r => r.vendor, r => r.date);
+
+                    renderList('expenseList', data.expenses, 'amount-expense',
+                        r => r.vendor, r => r.date);
+                })
+                .catch(() => {
+                    document.getElementById('syncTime').textContent = 'Sync failed';
+                });
+        }
+
+        loadAndRender();
+        setInterval(loadAndRender, 60000);
+    </script>
+
+</body>
+</html>

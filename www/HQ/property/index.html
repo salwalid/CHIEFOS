@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asset Commander | ChiefOS HQ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #0f172a; color: #f8fafc; font-family: 'Inter', sans-serif; overflow: hidden; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .sidebar-item { border-left: 3px solid transparent; transition: all 0.2s; }
+        .sidebar-item.active { border-left-color: #10b981; background: rgba(16, 185, 129, 0.05); color: #10b981; }
+        .asset-card { background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 1.5rem; }
+        .status-badge { font-size: 10px; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; font-weight: bold; }
+        .status-active { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+        .status-alert { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+    </style>
+</head>
+<body class="h-screen flex flex-col">
+
+    <!-- Top Nav -->
+    <div class="glass border-b border-white/5 px-6 py-4 flex justify-between items-center z-20">
+        <div class="flex items-center space-x-4">
+            <a href="/HQ/" class="text-emerald-400 hover:text-emerald-300 transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+            <h1 class="text-xl font-bold tracking-tight">Asset Commander</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+            <div class="text-slate-500 text-xs font-mono uppercase tracking-widest" id="syncTime">Syncing...</div>
+            <div class="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></div>
+        </div>
+    </div>
+
+    <div class="flex flex-1 overflow-hidden">
+        <div class="w-72 glass border-r border-white/5 flex flex-col p-4 space-y-2 z-10">
+            <div class="text-slate-500 text-[10px] uppercase font-bold tracking-widest px-4 mb-2">Portfolio Assets</div>
+            <div id="sidebar-list"></div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-12" id="viewport">
+            <div id="asset-display" class="max-w-4xl space-y-12">
+                <div class="animate-pulse flex flex-col space-y-8">
+                    <div class="h-10 bg-slate-800 rounded w-1/3"></div>
+                    <div class="grid grid-cols-3 gap-6">
+                        <div class="h-32 bg-slate-800 rounded-2xl"></div>
+                        <div class="h-32 bg-slate-800 rounded-2xl"></div>
+                        <div class="h-32 bg-slate-800 rounded-2xl"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let portfolioData = { assets: {}, syncTime: '' };
+
+        function dotColor(asset) {
+            const s = (asset.status || '').toLowerCase();
+            if (s.includes('vacating') || s.includes('planning')) return 'bg-amber-500';
+            if (asset.type === 'Other') return 'bg-sky-500';
+            return 'bg-emerald-500';
+        }
+
+        function buildSidebar() {
+            const list = document.getElementById('sidebar-list');
+            list.innerHTML = '';
+            const ids = Object.keys(portfolioData.assets);
+            ids.forEach((id, i) => {
+                const asset = portfolioData.assets[id];
+                const btn = document.createElement('button');
+                btn.id = 'btn-' + id;
+                btn.className = 'sidebar-item w-full text-left px-4 py-3 rounded-xl text-sm font-medium hover:bg-white/5 transition flex items-center justify-between' + (i === 0 ? ' active' : '');
+                btn.onclick = () => showAsset(id);
+                btn.innerHTML = `<span>${asset.name}</span><span class="w-2 h-2 rounded-full ${dotColor(asset)}"></span>`;
+                list.appendChild(btn);
+            });
+        }
+
+        function showAsset(id) {
+            document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+            const btn = document.getElementById('btn-' + id);
+            if (btn) btn.classList.add('active');
+
+            const asset = portfolioData.assets[id];
+            if (!asset) return;
+
+            document.getElementById('asset-display').innerHTML = `
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h2 class="text-4xl font-black tracking-tight mb-2">${asset.name}</h2>
+                        <span class="text-slate-500 font-mono text-xs uppercase tracking-widest">${asset.type}</span>
+                    </div>
+                    <span class="status-badge ${asset.status && (asset.status.includes('Vacating') || asset.status.includes('Planning')) ? 'status-alert' : 'status-active'}">${asset.status || 'Unknown'}</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="asset-card">
+                        <div class="text-slate-500 text-[10px] uppercase font-bold tracking-widest mb-4">Last Maintenance</div>
+                        <div class="text-xl font-bold">${asset.last_maintenance || 'N/A'}</div>
+                    </div>
+                    <div class="asset-card">
+                        <div class="text-slate-500 text-[10px] uppercase font-bold tracking-wider mb-4">Next Tax Due</div>
+                        <div class="text-xl font-bold">${asset.next_tax_due || 'N/A'}</div>
+                    </div>
+                    <div class="asset-card">
+                        <div class="text-slate-500 text-[10px] uppercase font-bold tracking-widest mb-4">Cleaning Status</div>
+                        <div class="text-xl font-bold">${asset.cleaning_status || 'N/A'}</div>
+                    </div>
+                </div>
+                <div class="bg-emerald-500/5 border border-emerald-500/10 p-8 rounded-[2rem]">
+                    <h3 class="text-emerald-400 font-bold text-xs uppercase tracking-widest mb-4">Critical Alpha Intelligence</h3>
+                    <pre class="text-slate-200 text-sm leading-relaxed whitespace-pre-wrap font-sans">${asset.critical_notes || 'No notes.'}</pre>
+                </div>
+            `;
+        }
+
+        fetch('property_data.json?t=' + Date.now())
+            .then(r => r.json())
+            .then(data => {
+                portfolioData = data;
+                document.getElementById('syncTime').innerText = 'Sync: ' + data.syncTime;
+                buildSidebar();
+                const firstId = Object.keys(data.assets)[0];
+                if (firstId) showAsset(firstId);
+            })
+            .catch(() => {
+                document.getElementById('syncTime').innerText = 'Sync failed';
+                document.getElementById('asset-display').innerHTML = '<p class="text-slate-500">Failed to load property data. Run master_hydration.sh.</p>';
+            });
+    </script>
+</body>
+</html>

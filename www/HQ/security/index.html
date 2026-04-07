@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security HQ | ChiefOS HQ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #0f172a; color: #f8fafc; font-family: 'Inter', sans-serif; overflow: hidden; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .sidebar-item { border-left: 3px solid transparent; transition: all 0.2s; }
+        .sidebar-item.active { border-left-color: #38bdf8; background: rgba(56, 189, 248, 0.05); color: #38bdf8; }
+        pre { background: rgba(15, 23, 42, 0.5); padding: 1.5rem; border-radius: 0.75rem; font-size: 0.85rem; overflow-x: auto; border: 1px solid rgba(255,255,255,0.05); line-height: 1.6; }
+        .analyst-box { border-left: 4px solid #38bdf8; background: rgba(56, 189, 248, 0.05); padding: 1.25rem; }
+        .metric-card { background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.05); padding: 1rem; border-radius: 1rem; transition: all 0.3s; }
+        .metric-card:hover { background: rgba(255,255,255,0.05); transform: translateY(-2px); }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        .modal-bg { background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(5px); }
+    </style>
+</head>
+<body class="h-screen flex flex-col">
+
+    <!-- Modal for Details -->
+    <div id="modal" class="fixed inset-0 z-50 flex items-center justify-center p-6 hidden">
+        <div class="fixed inset-0 modal-bg" onclick="closeModal()"></div>
+        <div class="glass max-w-2xl w-full p-8 rounded-2xl relative z-10 shadow-2xl border-sky-500/30">
+            <h3 id="modal-title" class="text-xl font-bold mb-4 text-white uppercase tracking-tight">Details</h3>
+            <div id="modal-content" class="text-slate-300 text-sm leading-relaxed space-y-2"></div>
+            <button onclick="closeModal()" class="mt-8 px-6 py-2 bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold rounded-lg transition">CLOSE</button>
+        </div>
+    </div>
+
+    <!-- Top Nav -->
+    <div class="glass border-b border-white/5 px-6 py-4 flex justify-between items-center z-20">
+        <div class="flex items-center space-x-4">
+            <a href="/HQ/" class="text-sky-400 hover:text-sky-300 transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+            <h1 class="text-xl font-bold tracking-tight">Security HQ</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+            <div class="text-slate-500 text-xs font-mono uppercase tracking-widest" id="syncTime">Syncing...</div>
+            <div class="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></div>
+        </div>
+    </div>
+
+    <div class="flex flex-1 overflow-hidden">
+        <div class="w-64 glass border-r border-white/5 flex flex-col p-4 space-y-2 z-10">
+            <div class="text-slate-500 text-[10px] uppercase font-bold tracking-widest px-4 mb-2">Primary Views</div>
+            <button onclick="showView('latest')" id="btn-latest" class="sidebar-item active w-full text-left px-4 py-3 rounded-lg text-sm font-medium hover:bg-white/5 transition">Latest Report</button>
+            <div class="text-slate-500 text-[10px] uppercase font-bold tracking-widest px-4 mt-6 mb-2">Aggregates</div>
+            <button onclick="showView('daily')" id="btn-daily" class="sidebar-item w-full text-left px-4 py-3 rounded-lg text-sm font-medium hover:bg-white/5 transition">Weekly Summary</button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-8" id="viewport">
+            <div id="view-latest" class="space-y-8">
+                <div class="grid grid-cols-1 md:grid-cols-7 gap-4">
+                    <div class="metric-card cursor-pointer" id="metric-attacks" onclick="openModal('attacks')">
+                        <div class="text-slate-500 text-[10px] uppercase font-bold tracking-wider mb-1">Attacks Blocked</div>
+                        <div class="text-2xl font-bold text-white" id="val-attacks">0</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="text-slate-500 text-[10px] uppercase font-bold tracking-wider mb-1">Banned (Total)</div>
+                        <div class="text-2xl font-bold text-sky-400" id="val-banned">0</div>
+                    </div>
+                    <div class="metric-card cursor-pointer" id="metric-updates" onclick="openModal('updates')">
+                        <div class="text-slate-500 text-[10px] uppercase font-bold tracking-wider mb-1">System Updates</div>
+                        <div class="text-2xl font-bold text-white" id="val-updates">0</div>
+                    </div>
+                    <div class="metric-card cursor-pointer" id="metric-perms" onclick="openModal('perms')">
+                        <div class="text-slate-500 text-[10px] uppercase font-bold tracking-wider mb-1">Permission Alerts</div>
+                        <div class="text-2xl font-bold text-white" id="val-perms">0</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="text-slate-500 text-[10px] uppercase font-bold tracking-wider mb-1">Gateway</div>
+                        <div class="text-2xl font-bold text-emerald-400">LIVE</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="text-slate-500 text-[10px] uppercase font-bold tracking-wider mb-1">Firewall</div>
+                        <div class="text-2xl font-bold text-emerald-400">ACTIVE</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="text-slate-500 text-[10px] uppercase font-bold tracking-wider mb-1">Fail2Ban</div>
+                        <div class="text-2xl font-bold" id="val-f2b">OFF</div>
+                    </div>
+                </div>
+
+                <div class="analyst-box">
+                    <h3 class="text-sky-400 font-bold text-xs uppercase mb-2">Alpha Analyst Opinion</h3>
+                    <p id="opinion-latest" class="text-sm italic text-slate-200 leading-relaxed">Analyzing system telemetry...</p>
+                </div>
+
+                <div>
+                    <h2 class="text-lg font-bold mb-4 flex items-center">Snapshot Logs</h2>
+                    <pre id="raw-latest" class="text-slate-300">Loading...</pre>
+                </div>
+            </div>
+
+            <div id="view-daily" class="hidden space-y-8">
+                <h2 class="text-xl font-bold mb-4">Weekly Summary</h2>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="metric-card"><div class="text-slate-500 text-[10px] uppercase mb-2">Attacks Blocked</div><div class="text-3xl font-bold text-emerald-400" id="week-attacks">0</div></div>
+                    <div class="metric-card"><div class="text-slate-500 text-[10px] uppercase mb-2">Banned (Weekly)</div><div class="text-3xl font-bold text-sky-400" id="week-banned">0</div></div>
+                    <div class="metric-card"><div class="text-slate-500 text-[10px] uppercase mb-2">Critical Audits</div><div class="text-3xl font-bold text-rose-400" id="week-critical">0</div></div>
+                    <div class="metric-card"><div class="text-slate-500 text-[10px] uppercase mb-2">Days Covered</div><div class="text-3xl font-bold text-sky-400" id="week-days">0</div></div>
+                </div>
+
+                <div id="top-weekly-vectors" class="space-y-4">
+                    <h3 class="text-slate-500 text-[10px] uppercase font-bold tracking-widest">Top 10 Attack Vectors (Weekly)</h3>
+                    <div id="weekly-top-list" class="space-y-2"></div>
+                </div>
+
+                <div class="analyst-box border-emerald-500 bg-emerald-500/5">
+                    <h3 class="text-emerald-400 font-bold text-xs uppercase mb-2">Weekly Alpha Opinion</h3>
+                    <p id="opinion-weekly" class="text-sm italic text-slate-200 leading-relaxed"></p>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <script>
+        function showView(id) {
+            document.querySelectorAll('#viewport > div').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+            document.getElementById('view-' + id).classList.remove('hidden');
+            document.getElementById('btn-' + id).classList.add('active');
+        }
+
+        function syntaxHighlight(text) {
+            if (!text) return text;
+            return text
+                .replace(/(active|allow|enabled|success|verified|pass)/gi, '<span class="text-emerald-400 font-bold">$1</span>')
+                .replace(/(inactive|deny|disabled|critical|error|failed|warning|missing|unauthorized)/gi, '<span class="text-rose-400 font-bold">$1</span>')
+                .replace(/(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/g, '<span class="text-sky-300 font-mono">$1</span>')
+                .replace(/(---\s.*?\s---)/g, '<span class="text-sky-500 font-bold mt-4 block">$1</span>');
+        }
+
+        let securityData = {};
+
+        fetch('security_data.json?t=' + Date.now())
+            .then(r => r.json())
+            .then(data => {
+                securityData = data;
+                updateUI();
+            })
+            .catch(() => {
+                document.getElementById('syncTime').innerText = 'Sync failed';
+                document.getElementById('opinion-latest').innerText = 'Failed to load security data. Run master_hydration.sh.';
+                document.getElementById('raw-latest').innerText = 'No data available.';
+            });
+
+function openModal(type) {
+            const modal = document.getElementById('modal');
+            const title = document.getElementById('modal-title');
+            const content = document.getElementById('modal-content');
+            if (type === 'updates') {
+                title.innerText = "System Updates Required";
+                content.innerHTML = `<p>There are <b>${securityData.metrics.updates}</b> packages available for upgrade.</p>`;
+            } else if (type === 'perms') {
+                title.innerText = "Security Permission Alerts";
+                content.innerHTML = `<ul class="list-disc ml-5 space-y-2">` + 
+                    securityData.metrics.permission_alerts.map(a => `<li>${a}</li>`).join('') + 
+                    `</ul>`;
+            } else if (type === 'attacks') {
+                title.innerText = "Blocked Attack Vectors";
+                const attackCount = securityData.metrics.attacks ? securityData.metrics.attacks.length : 0;
+                content.innerHTML = `<p class="mb-4">Perimeter monitoring identified <b>${attackCount}</b> unique source IPs attempting unauthorized access in this cycle:</p>` + 
+                    `<ul class="list-disc ml-5 space-y-2 font-mono text-xs">` + 
+                    (securityData.metrics.attacks || []).map(ip => `<li>${ip}</li>`).join('') + 
+                    `</ul>`;
+            }
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() { document.getElementById('modal').classList.add('hidden'); }
+
+        function updateUI() {
+            document.getElementById('raw-latest').innerHTML = syntaxHighlight(securityData.latestRaw);
+            document.getElementById('opinion-latest').innerText = securityData.latestOpinion;
+            document.getElementById('syncTime').innerText = `Sync: ${securityData.syncTime}`;
+            document.getElementById('val-updates').innerText = securityData.metrics.updates;
+            document.getElementById('val-perms').innerText = securityData.metrics.permission_alerts.length;
+            document.getElementById('val-attacks').innerText = (securityData.metrics.attacks || []).length;
+            document.getElementById('val-banned').innerText = securityData.metrics.banned_count || 0;
+            
+            const f2b = document.getElementById('val-f2b');
+            f2b.innerText = securityData.metrics.fail2ban_status || "OFF";
+            f2b.className = (securityData.metrics.fail2ban_status === "ACTIVE") ? "text-2xl font-bold text-emerald-400" : "text-2xl font-bold text-rose-400";
+
+            if (securityData.metrics.updates > 0) document.getElementById('metric-updates').classList.add('border-rose-500/50', 'bg-rose-500/5');
+            if (securityData.metrics.permission_alerts.length > 0) document.getElementById('metric-perms').classList.add('border-rose-500/50', 'bg-rose-500/5');
+            if ((securityData.metrics.attacks || []).length > 0) document.getElementById('metric-attacks').classList.add('border-rose-500/50', 'bg-rose-500/5');
+
+            if (securityData.weekly && securityData.weekly.metrics) {
+                document.getElementById('week-attacks').innerText = securityData.weekly.metrics.total_attacks || 0;
+                document.getElementById('week-banned').innerText = securityData.weekly.metrics.total_bans || 0;
+                document.getElementById('week-critical').innerText = securityData.weekly.metrics.critical_events || 0;
+                document.getElementById('week-days').innerText = securityData.weekly.metrics.days_covered || 0;
+                document.getElementById('opinion-weekly').innerText = securityData.weekly.opinion || "No weekly data analyzed yet.";
+                
+                const weeklyTop = document.getElementById('weekly-top-list');
+                if (securityData.weekly.metrics.top_ips) {
+                    weeklyTop.innerHTML = securityData.weekly.metrics.top_ips.map(item => `
+                        <div class="flex justify-between items-center p-3 glass rounded-lg border-white/5">
+                            <span class="font-mono text-sm text-sky-300">${item.ip}</span>
+                            <span class="text-xs font-bold text-slate-500">${item.count} attempts</span>
+                        </div>
+                    `).join('');
+                }
+            }
+        }
+    </script>
+</body>
+</html>
