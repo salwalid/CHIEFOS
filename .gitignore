@@ -22,8 +22,8 @@ logs/
 # ---- Runtime data ----
 memory/
 archives/
-wiki/
-raw/
+/wiki/
+/raw/
 
 # ---- Generated JSON data files (hydrated at runtime) ----
 www/HQ/**/*_data.json
