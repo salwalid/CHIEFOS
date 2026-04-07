@@ -163,7 +163,32 @@ else
 fi
 
 # -------------------------------------------------------
-# 7. Governance files
+# 7. Wiki knowledge base
+# -------------------------------------------------------
+echo ""
+echo "--- Wiki Knowledge Base ---"
+if [[ -d "$BASE_DIR/wiki" ]]; then
+    WIKI_PAGES=$(find "$BASE_DIR/wiki" -name "*.md" 2>/dev/null | wc -l)
+    echo "${PASS} Wiki directory present ($WIKI_PAGES markdown files)"
+else
+    echo "${WARN} Wiki directory missing — run: bash wiki-install.sh"
+    WARNINGS=$((WARNINGS + 1))
+fi
+if [[ -d "$BASE_DIR/raw" ]]; then
+    echo "${PASS} Raw source directory present"
+else
+    echo "${WARN} Raw directory missing"
+    WARNINGS=$((WARNINGS + 1))
+fi
+if [[ -f "$BASE_DIR/wiki/index.md" ]]; then
+    echo "${PASS} wiki/index.md present"
+else
+    echo "${WARN} wiki/index.md missing"
+    WARNINGS=$((WARNINGS + 1))
+fi
+
+# -------------------------------------------------------
+# 8. Governance files
 # -------------------------------------------------------
 echo ""
 echo "--- Governance Files ---"

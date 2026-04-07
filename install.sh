@@ -232,10 +232,16 @@ sudo -u "$COS_USER" mkdir -p \
     "$BASE_DIR/scripts/core" \
     "$BASE_DIR/scripts/alerts" \
     "$BASE_DIR/scripts/utils" \
+    "$BASE_DIR/scripts/wiki" \
     "$BASE_DIR/www/HQ" \
     "$BASE_DIR/memory/archives" \
     "$BASE_DIR/logs" \
-    "$BASE_DIR/skills"
+    "$BASE_DIR/skills" \
+    "$BASE_DIR/wiki/research" \
+    "$BASE_DIR/wiki/concepts" \
+    "$BASE_DIR/wiki/entities" \
+    "$BASE_DIR/wiki/topics" \
+    "$BASE_DIR/raw"
 
 verify "Directory structure created" "[ -d '$BASE_DIR/scripts/core' ]"
 verify "Logs directory created"      "[ -d '$BASE_DIR/logs' ]"
@@ -301,7 +307,29 @@ SCRIPT_COUNT=$(find "$BASE_DIR/scripts" -name "*.py" -o -name "*.sh" | wc -l)
 ok "$SCRIPT_COUNT scripts deployed and configured"
 
 # -------------------------------------------------------
-# STEP 4 — Initialize database
+# STEP 4 — Initialize wiki knowledge base
+# -------------------------------------------------------
+step "Initialize wiki knowledge base"
+
+for seed_file in index.md log.md hot.md; do
+    DEST="$BASE_DIR/wiki/$seed_file"
+    if [[ -f "$DEST" ]]; then
+        warn "$seed_file already exists — skipping (existing wiki preserved)"
+    else
+        sudo -u "$COS_USER" cp "$CHIEFOS_SRC/setup/wiki/$seed_file" "$DEST"
+        ok "$seed_file created"
+    fi
+done
+
+sudo find "$BASE_DIR/scripts/wiki" -name "*.sh" -exec chmod +x {} \;
+
+verify "Wiki directory ready"   "[ -d '$BASE_DIR/wiki' ]"
+verify "Raw directory ready"    "[ -d '$BASE_DIR/raw' ]"
+verify "Wiki index present"     "[ -f '$BASE_DIR/wiki/index.md' ]"
+ok "Drop files into $BASE_DIR/raw/ and ask your agent to ingest them"
+
+# -------------------------------------------------------
+# STEP 5 — Initialize database
 # -------------------------------------------------------
 step "Initialize database"
 
@@ -319,7 +347,7 @@ fi
 bash "$CHIEFOS_SRC/setup/verify_db.sh" "$DB_PATH"
 
 # -------------------------------------------------------
-# STEP 5 — Deploy HQ dashboards
+# STEP 6 — Deploy HQ dashboards
 # -------------------------------------------------------
 step "Deploy HQ dashboards"
 
@@ -353,7 +381,7 @@ verify "Dashboard pages deployed ($PAGE_COUNT pages)" "[ '$PAGE_COUNT' -ge 7 ]"
 verify "www/ permissions set for Nginx" "[ -r '$BASE_DIR/www/HQ/index.html' ]"
 
 # -------------------------------------------------------
-# STEP 6 — Deploy governance files
+# STEP 7 — Deploy governance files
 # -------------------------------------------------------
 step "Deploy governance files (SOUL, TOOLS, AGENTS)"
 
@@ -389,7 +417,7 @@ verify "AGENTS.md present" "[ -f '$BASE_DIR/AGENTS.md' ]"
 warn "ACTION REQUIRED: Edit $BASE_DIR/SOUL.md — replace [YOUR_AGENT_NAME] and [YOUR_NAME]"
 
 # -------------------------------------------------------
-# STEP 7 — Install Angel
+# STEP 8 — Install Angel
 # -------------------------------------------------------
 step "Install Angel (governance service)"
 
@@ -494,7 +522,7 @@ SKILL
 fi
 
 # -------------------------------------------------------
-# STEP 8 — Install crontab
+# STEP 9 — Install crontab
 # -------------------------------------------------------
 step "Install crontab"
 
@@ -581,7 +609,7 @@ CRON_LINES=$(sudo crontab -u "$COS_USER" -l | grep -v "^#" | grep -v "^$" | wc -
 verify "Crontab installed ($CRON_LINES active jobs)" "[ '$CRON_LINES' -ge 10 ]"
 
 # -------------------------------------------------------
-# STEP 9 — First hydration
+# STEP 10 — First hydration
 # -------------------------------------------------------
 step "First hydration (generate dashboard data)"
 
@@ -594,7 +622,7 @@ JSON_COUNT=$(find "$BASE_DIR/www/HQ" -name "*.json" | wc -l)
 ok "Hydration complete ($JSON_COUNT data files generated)"
 
 # -------------------------------------------------------
-# STEP 10 — Nginx + SSL + Firewall
+# STEP 11 — Nginx + SSL + Firewall
 # -------------------------------------------------------
 step "Web server, SSL, and firewall"
 
@@ -648,7 +676,7 @@ else
 fi
 
 # -------------------------------------------------------
-# STEP 11 — Log rotation
+# STEP 12 — Log rotation
 # -------------------------------------------------------
 step "Log rotation"
 

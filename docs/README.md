@@ -16,6 +16,7 @@ ChiefOS gives your AI agent a complete operational backbone: a structured SQLite
 - **Guardian (Angel)** — an independent governance layer running as a separate OS user that authorizes consequential agent actions before they execute
 - **Model-agnostic** — works with any AI that can read files and run shell commands (Claude, GPT-4, Gemini, local models)
 - **One-command install** — `bash install.sh` walks you through everything
+- **Wiki knowledge base** — a persistent, compounding knowledge base your agent maintains. Drop files into `raw/`, ask your agent to ingest them. Knowledge accumulates and cross-references over time rather than being re-derived on every query
 
 ---
 

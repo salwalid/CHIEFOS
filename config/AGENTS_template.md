@@ -155,3 +155,70 @@ or due date — it lives in `todos` with a `linked_type`/`linked_id` back to
 its source record. This is what powers the HQ Schedule calendar and all alert scripts.
 
 **Never bypass `add_todo.py`** — direct SQL inserts skip the real-time schedule hydration.
+
+---
+
+## Wiki — Knowledge Base Management
+
+The wiki is a persistent, compounding knowledge base you maintain on behalf of the Principal.
+It compounds over time — every source ingested and every good answer filed makes it richer.
+
+**Locations:**
+- Wiki pages: `$BASE_DIR/wiki/`
+- Raw sources: `$BASE_DIR/raw/` (drop files here — never modify these)
+- Index: `$BASE_DIR/wiki/index.md`
+- Log: `$BASE_DIR/wiki/log.md`
+- Hot cache: `$BASE_DIR/wiki/hot.md`
+
+**Wiki scripts:**
+```bash
+bash $BASE_DIR/scripts/wiki/ingest_prep.sh <filename>   # preview + log a raw file
+bash $BASE_DIR/scripts/wiki/new_page.sh "<title>" <cat> # scaffold a new page
+bash $BASE_DIR/scripts/wiki/search_wiki.sh <query>      # search all pages
+bash $BASE_DIR/scripts/wiki/lint_wiki.sh                # audit health
+```
+
+### Page Format
+Every wiki page uses YAML frontmatter:
+```
+---
+title: Page Title
+category: research | concepts | entities | topics
+created: YYYY-MM-DD
+updated: YYYY-MM-DD
+sources: [source-file.md]
+tags: [tag1, tag2]
+---
+```
+Use `[[page-name]]` for all internal links (Obsidian-compatible).
+
+### Ingest Workflow
+When told to ingest a file from `raw/`:
+1. Read the source file in full
+2. Discuss key takeaways with Principal (if interactive)
+3. Write a summary page in `wiki/research/`
+4. Create or update entity/concept pages the source touches (typically 5–15 pages per source)
+5. Note contradictions with existing wiki content — flag, don't silently overwrite
+6. Update `wiki/index.md` — add new pages with one-line summaries
+7. Append to `wiki/log.md`: `## [YYYY-MM-DD] ingest | <filename>`
+8. Raw source is never modified or deleted
+
+### Query Workflow
+When asked a question that the wiki might answer:
+1. Read `wiki/index.md` to find relevant pages
+2. Read those pages and follow `[[links]]` as needed
+3. Synthesize answer with citations using `[[page-name]]`
+4. If the answer is a valuable synthesis — offer to file it as a new wiki page. Good answers shouldn't disappear into chat history.
+
+### Lint Workflow
+When asked to lint or health-check the wiki:
+```bash
+bash $BASE_DIR/scripts/wiki/lint_wiki.sh
+```
+Then manually address: contradictions between pages, stale claims superseded by newer sources,
+important concepts mentioned frequently but lacking their own page, suggested new sources to find.
+
+### Hot Cache Rules
+- `wiki/hot.md` holds the 500 most recent/active context items
+- During lint: trim to 500 lines, keep most recent
+- Update hot.md during active sessions with key facts and decisions

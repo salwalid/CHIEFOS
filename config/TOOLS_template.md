@@ -356,3 +356,47 @@ bash $BASE_DIR/scripts/core/master_hydration.sh
 | `monthly_summary.py` | Last day of month 9pm | Monthly finance and activity summary |
 
 All alert scripts send via `$BASE_DIR/scripts/utils/send_alert.sh` (Telegram by default).
+
+---
+
+## Wiki Knowledge Base
+
+A persistent, compounding knowledge base maintained by the agent.
+Drop files into `raw/`, ask the agent to ingest. Knowledge compounds over time.
+
+```
+wiki_dir:  $BASE_DIR/wiki/
+raw_dir:   $BASE_DIR/raw/
+index:     $BASE_DIR/wiki/index.md
+log:       $BASE_DIR/wiki/log.md
+hot_cache: $BASE_DIR/wiki/hot.md (500-line limit)
+```
+
+**Wiki scripts:**
+
+| Script | Usage | Purpose |
+|---|---|---|
+| `scripts/wiki/ingest_prep.sh` | `bash ingest_prep.sh <filename>` | Preview raw file + log ingest start |
+| `scripts/wiki/new_page.sh` | `bash new_page.sh "<title>" <category>` | Scaffold a new wiki page |
+| `scripts/wiki/search_wiki.sh` | `bash search_wiki.sh <query>` | Search all wiki pages |
+| `scripts/wiki/lint_wiki.sh` | `bash lint_wiki.sh` | Audit for orphans, broken links, size |
+
+**Categories:** `research/` | `concepts/` | `entities/` | `topics/`
+
+**Ingest a new source:**
+```bash
+# 1. Drop file into raw/
+# 2. Preview it
+bash $BASE_DIR/scripts/wiki/ingest_prep.sh myfile.md
+# 3. Tell your agent: "Ingest $BASE_DIR/raw/myfile.md into the wiki"
+```
+
+**Search the wiki:**
+```bash
+bash $BASE_DIR/scripts/wiki/search_wiki.sh "mortgage rates"
+```
+
+**Standalone install on existing system:**
+```bash
+bash wiki-install.sh
+```
