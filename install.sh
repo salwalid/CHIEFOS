@@ -110,7 +110,50 @@ else
 
     ask BASE_DIR    "ChiefOS workspace path" "/home/chiefos/chiefos"
     ask COS_USER    "OS username for ChiefOS" "chiefos"
-    ask BASE_URL    "Your domain (no http://, no trailing slash)" "yourdomain.com"
+
+    # Detect public IP before asking for domain so we can show the DNS record to create
+    echo ""
+    PUBLIC_IP=$(curl -sf --max-time 5 https://api.ipify.org 2>/dev/null || \
+                curl -sf --max-time 5 https://ifconfig.me 2>/dev/null || \
+                hostname -I | awk '{print $1}')
+    echo "  This server's public IP: ${PUBLIC_IP}"
+    echo ""
+    echo "  Tip: create a subdomain at your domain registrar before entering it here."
+    echo "  Example DNS record:"
+    echo ""
+    echo "    Type:  A"
+    echo "    Name:  hq          (the subdomain — e.g. hq.yourdomain.com)"
+    echo "    Value: $PUBLIC_IP"
+    echo "    TTL:   300"
+    echo ""
+    echo "  Enter the full subdomain below (e.g. hq.yourdomain.com)."
+    echo "  Or enter the IP directly ($PUBLIC_IP) to skip DNS and SSL."
+    echo ""
+    ask BASE_URL    "Your domain or IP (no http://, no trailing slash)" "$PUBLIC_IP"
+
+    # If a real domain was entered, pause and confirm DNS is set up
+    if echo "$BASE_URL" | grep -qP '^[a-zA-Z]'; then
+        echo ""
+        echo "  ┌──────────────────────────────────────────────────────┐"
+        echo "  │  Create this DNS record at your domain registrar:    │"
+        echo "  │                                                      │"
+        echo "  │    Type:  A                                          │"
+        printf  "  │    Name:  %-42s│\n" "$BASE_URL"
+        printf  "  │    Value: %-42s│\n" "$PUBLIC_IP"
+        echo "  │    TTL:   300 (or lowest available)                  │"
+        echo "  └──────────────────────────────────────────────────────┘"
+        echo ""
+        echo "  DNS propagation usually takes 1–5 minutes."
+        echo "  SSL (Certbot) will run at the end of this install — your domain"
+        echo "  must be resolving by then for SSL to work."
+        echo ""
+        read -rp "  → Press Enter once your DNS record is saved, to continue: "
+        echo ""
+    else
+        warn "Using IP address — no DNS record needed. SSL will be skipped (domain required for SSL)."
+        echo ""
+    fi
+
     ask DB_NAME     "Database filename" "chiefos.db"
     ask TZ          "Your timezone" "America/New_York"
     ask GMAIL_USER  "Gmail address for email monitoring" ""
@@ -153,12 +196,23 @@ DB_PATH="$BASE_DIR/$DB_NAME"
 
 ok "Config loaded"
 echo ""
-echo "  BASE_DIR:  $BASE_DIR"
-echo "  COS_USER:  $COS_USER"
-echo "  BASE_URL:  $BASE_URL"
-echo "  DB_NAME:   $DB_NAME"
-echo "  TZ:        ${TZ:-America/New_York}"
+echo "  BASE_DIR:   $BASE_DIR"
+echo "  COS_USER:   $COS_USER"
+echo "  BASE_URL:   $BASE_URL"
+echo "  DB_NAME:    $DB_NAME"
+echo "  TZ:         ${TZ:-America/New_York}"
 echo "  ANGEL_PORT: $ANGEL_PORT"
+
+# Show server IP and DNS reminder if a domain is configured
+if echo "$BASE_URL" | grep -qP '^[a-zA-Z]'; then
+    PUBLIC_IP=$(curl -sf --max-time 5 https://api.ipify.org 2>/dev/null || \
+                curl -sf --max-time 5 https://ifconfig.me 2>/dev/null || \
+                hostname -I | awk '{print $1}')
+    echo ""
+    echo "  Server IP: $PUBLIC_IP"
+    echo "  ${WARN} Make sure $BASE_URL → $PUBLIC_IP is set in your DNS before Nginx/SSL runs."
+    echo "  If not done yet, do it now — SSL (Step 10) requires the domain to be resolving."
+fi
 
 # -------------------------------------------------------
 # STEP 2 — Create system user and directories
