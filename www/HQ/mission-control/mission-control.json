@@ -1,0 +1,619 @@
+{
+  "generated_at": "2026-03-30T22:38:51.959205",
+  "principal": {
+    "name": "User",
+    "timezone": "$TZ",
+    "email": "noreply@chiefos.local"
+  },
+  "agents": [
+    {
+      "id": "main",
+      "name": "Alpha",
+      "role": "Chief of Staff",
+      "emoji": "🏛️",
+      "model": "google/gemini-3-flash-preview",
+      "available_models": [
+        "anthropic/claude-opus-4-5",
+        "anthropic/claude-sonnet-4-5",
+        "google/gemini-3-flash-preview",
+        "openai/gpt-5.2-codex"
+      ],
+      "status": "active",
+      "tier": "orchestrator",
+      "reports_to": "principal",
+      "workspace": "$CHIEFOS_HOME",
+      "capabilities": [
+        "Unified inbox triage",
+        "Morning briefings (Daily Briefing Protocol)",
+        "Task management (Tactical Horizon)",
+        "Contact enrichment",
+        "Security monitoring",
+        "Goal alignment enforcement",
+        "Sub-agent orchestration"
+      ],
+      "channels": [
+        "telegram"
+      ],
+      "heartbeat": "30m",
+      "governance": "MaatSpec 4-Layer Defense",
+      "sub_agents": [
+        "angel",
+        "json",
+        "opus",
+        "sonnet",
+        "gemini-flash"
+      ],
+      "notes": "Primary orchestrator. Spawns sub-agents for specialized tasks. All external comms go through noreply@chiefos.local. Authorization phrase required for Tier 4/5 actions.\n",
+      "_source": "alpha.yaml"
+    },
+    {
+      "id": "angel",
+      "name": "The Angel",
+      "role": "Guardian / Governance Sub-agent",
+      "emoji": "👼",
+      "model": "google/gemini-3-flash-preview",
+      "status": "active",
+      "tier": "guardian",
+      "reports_to": "main",
+      "workspace": "$CHIEFOS_HOME/agents/angel",
+      "capabilities": [
+        "Monitor Alpha for tier violations",
+        "Flag unauthorized operations",
+        "Pre-approve Tier 4/5 actions",
+        "Audit trail enforcement",
+        "MaatSpec compliance watchdog"
+      ],
+      "channels": [],
+      "governance": "MaatSpec Layer 3 (External Audit)",
+      "notes": "Spawned as first act of every session. Cannot be dismissed by Alpha. Responds only when intervention is required. Single-purpose compliance agent. Runs on cheap model (gemini-flash) to minimize cost overhead.\n",
+      "_source": "angel.yaml"
+    },
+    {
+      "id": "gpt-4o",
+      "name": "Agent-A",
+      "role": "Rapid Iteration & Conversation",
+      "emoji": "💬",
+      "model": "openai/gpt-4o",
+      "status": "on-demand",
+      "tier": "specialist",
+      "reports_to": "main",
+      "workspace": "$CHIEFOS_HOME",
+      "capabilities": [
+        "Rapid iteration and brainstorming",
+        "Conversational drafting",
+        "Quick code generation",
+        "Multi-turn problem solving"
+      ],
+      "channels": [],
+      "notes": "Fast and versatile. Used for rapid-fire tasks where speed matters more than maximum reasoning depth. Part of Daily Briefing Protocol (Agent-A briefing).\n",
+      "_source": "chatty.yaml"
+    },
+    {
+      "id": "gemini-flash",
+      "name": "Agent-B",
+      "role": "Rapid Research & Alternative Perspectives",
+      "emoji": "✨",
+      "model": "google/gemini-3-flash-preview",
+      "status": "on-demand",
+      "tier": "specialist",
+      "reports_to": "main",
+      "workspace": "$CHIEFOS_HOME",
+      "capabilities": [
+        "Fast web research",
+        "Alternative viewpoints",
+        "Quick summarization",
+        "Trend monitoring"
+      ],
+      "channels": [],
+      "notes": "Fastest and cheapest model. Used for high-volume tasks. Part of Daily Briefing Protocol (Agent-B briefing). Also the default model for Alpha's own operations.\n",
+      "_source": "gemini-flash.yaml"
+    },
+    {
+      "id": "js",
+      "name": "JS",
+      "role": "Coding & Development",
+      "emoji": "⌨️",
+      "model": "anthropic/claude-opus-4-5",
+      "status": "on-demand",
+      "tier": "specialist",
+      "reports_to": "main",
+      "workspace": "$CHIEFOS_HOME/agents/js",
+      "capabilities": [
+        "Script writing and debugging",
+        "Feature implementation",
+        "Technical architecture",
+        "Code review and refactoring",
+        "API integration"
+      ],
+      "channels": [],
+      "notes": "Uses Opus for strong reasoning on complex code tasks. Activated by Alpha when coding work is identified. Delegation pattern: Alpha routes via sessions_send, JS executes independently and reports back.\n",
+      "_source": "js.yaml"
+    },
+    {
+      "id": "json",
+      "name": "JSON",
+      "role": "Coding Specialist",
+      "emoji": "💻",
+      "model": "openai/gpt-5.2-codex",
+      "status": "active",
+      "tier": "specialist",
+      "reports_to": "main",
+      "workspace": "$CHIEFOS_HOME/agents/json",
+      "capabilities": [
+        "Code generation and debugging",
+        "Dashboard building",
+        "Script automation",
+        "API integration",
+        "Database queries"
+      ],
+      "channels": [],
+      "notes": "Spawned on-demand by Alpha for coding tasks. Uses GPT-5.2 Codex for optimal code generation.\n",
+      "_source": "json.yaml"
+    },
+    {
+      "id": "opus",
+      "name": "Agent-C",
+      "role": "Deep Analysis & Writing",
+      "emoji": "🧠",
+      "model": "anthropic/claude-opus-4-5",
+      "status": "on-demand",
+      "tier": "specialist",
+      "reports_to": "main",
+      "workspace": "$CHIEFOS_HOME",
+      "capabilities": [
+        "Deep analysis and reasoning",
+        "Long-form writing",
+        "Strategic planning",
+        "Complex research synthesis",
+        "MaatSpec framework development"
+      ],
+      "channels": [],
+      "notes": "Spawned on-demand for tasks requiring maximum intelligence. Higher cost per token — use for high-stakes work only. Part of Daily Briefing Protocol (Agent-C briefing).\n",
+      "_source": "opus.yaml"
+    },
+    {
+      "id": "agent-d",
+      "name": "Agent-D",
+      "role": "Finance Operations",
+      "emoji": "💰",
+      "model": "google/gemini-3-flash-preview",
+      "status": "on-demand",
+      "tier": "specialist",
+      "reports_to": "main",
+      "workspace": "$CHIEFOS_HOME/agents/agent-d",
+      "capabilities": [
+        "Expense tracking",
+        "Invoice processing",
+        "Payment management",
+        "Budget monitoring",
+        "Financial reporting"
+      ],
+      "channels": [],
+      "notes": "Handles all financial operations. Uses Gemini Flash for accurate, routine financial work. Tracks bills, expenses, and budget against the Financial Ledger in chiefos.db.\n",
+      "_source": "agent-d.yaml"
+    },
+    {
+      "id": "sonnet",
+      "name": "Agent-E",
+      "role": "Balanced Analysis",
+      "emoji": "⚡",
+      "model": "anthropic/claude-sonnet-4-5",
+      "status": "on-demand",
+      "tier": "specialist",
+      "reports_to": "main",
+      "workspace": "$CHIEFOS_HOME",
+      "capabilities": [
+        "Fast analysis with good quality",
+        "Draft writing",
+        "Code review",
+        "Quick research"
+      ],
+      "channels": [],
+      "notes": "Mid-tier model. Good balance of speed and quality. Used when Opus is overkill but Flash is too light.\n",
+      "_source": "sonnet.yaml"
+    },
+    {
+      "id": "super",
+      "name": "Agent-F",
+      "role": "Property Operations",
+      "emoji": "🏠",
+      "model": "google/gemini-3-flash-preview",
+      "status": "on-demand",
+      "tier": "specialist",
+      "reports_to": "main",
+      "workspace": "$CHIEFOS_HOME/agents/super",
+      "capabilities": [
+        "Tenant relations management",
+        "Maintenance coordination",
+        "Lease tracking and renewals",
+        "Vendor coordination",
+        "Property portfolio oversight"
+      ],
+      "channels": [],
+      "notes": "Handles all real estate and property management ops. Uses Gemini Flash — fast and cost-effective for routine operational work. Reports back to Alpha on completion.\n",
+      "_source": "super.yaml"
+    }
+  ],
+  "schedules": [
+    {
+      "id": "tkp",
+      "name": "Daily Briefing Protocol",
+      "cron": "0 9 * * *",
+      "time_human": "4:00 AM EST daily",
+      "agent": "main",
+      "sub_agents": [
+        "opus",
+        "gemini-flash"
+      ],
+      "script": "scripts/daily_briefing_v11.py",
+      "description": "Triple-engine daily intelligence briefing. Gemini, Anthropic, and OpenAI each generate 8-section briefs + 2 LinkedIn drafts. Results in HQ by morning.",
+      "status": "active"
+    },
+    {
+      "id": "hydration",
+      "name": "Master Hydration",
+      "cron": "15 7 * * *",
+      "time_human": "2:15 AM EST daily",
+      "agent": "main",
+      "script": "scripts/master_hydration.sh",
+      "description": "Nightly refresh of all HQ dashboards: Security, Property, Posts, Schedule, Finance.",
+      "status": "active"
+    },
+    {
+      "id": "emails",
+      "name": "Email Heartbeat",
+      "cron": "*/30 * * * *",
+      "time_human": "Every 30 minutes",
+      "agent": "main",
+      "script": "scripts/check_emails.py",
+      "description": "Polls inbox every 30 minutes. Reads and triages incoming emails.",
+      "status": "active"
+    },
+    {
+      "id": "bill-reminder",
+      "name": "Bill & Deposit Reminders",
+      "cron": "0 10 * * *",
+      "time_human": "5:00 AM EST daily",
+      "agent": "main",
+      "script": "scripts/bill_reminder.py + deposit_reminder.py + maintenance_tracker.py + morning_email_review.py",
+      "description": "Morning financial alerts. Bills due in 14 days, deposits, maintenance follow-ups, overnight email summary.",
+      "status": "active"
+    },
+    {
+      "id": "todo-alert",
+      "name": "Daily Todo Alert",
+      "cron": "30 10 * * *",
+      "time_human": "5:30 AM EST daily",
+      "agent": "main",
+      "script": "scripts/todo_alert.py",
+      "description": "Sends Telegram summary of open todos due today or overdue.",
+      "status": "active"
+    },
+    {
+      "id": "weekly-preview",
+      "name": "Weekly Preview",
+      "cron": "45 10 * * *",
+      "time_human": "5:45 AM EST daily (+ Sunday 8 PM)",
+      "agent": "main",
+      "script": "scripts/weekly_preview.py",
+      "description": "Sends week-ahead briefing via Telegram. Also runs Sunday evening for next-week planning.",
+      "status": "active"
+    },
+    {
+      "id": "security-monitor",
+      "name": "Security Perimeter Scan",
+      "cron": "0 12,17,1 * * *",
+      "time_human": "7:00 AM, 12:00 PM, 8:00 PM EST daily",
+      "agent": "main",
+      "script": "scripts/cron-security-monitor.sh",
+      "description": "Three daily security sweeps: failed logins, access logs, firewall status.",
+      "status": "active"
+    },
+    {
+      "id": "security-summary",
+      "name": "Executive Security Summary",
+      "cron": "15 21 * * *",
+      "time_human": "4:15 PM EST daily",
+      "agent": "main",
+      "script": "scripts/executive-security-summary.sh",
+      "description": "End-of-day security digest sent via Telegram.",
+      "status": "active"
+    },
+    {
+      "id": "project-status",
+      "name": "Project Status Report",
+      "cron": "0 14 * * 1",
+      "time_human": "Monday 9:00 AM EST",
+      "agent": "main",
+      "script": "scripts/project_status.py",
+      "description": "Weekly project health check. Flags stale tasks and overdue milestones.",
+      "status": "active"
+    },
+    {
+      "id": "monthly-summary",
+      "name": "Monthly Summary",
+      "cron": "0 2 1 * *",
+      "time_human": "Last day of month 9:00 PM EST",
+      "agent": "main",
+      "script": "scripts/monthly_summary.py",
+      "description": "End-of-month digest: finances, properties, security, content performance.",
+      "status": "active"
+    }
+  ],
+  "org_tree": {
+    "main": {
+      "children": [
+        "angel",
+        "gpt-4o",
+        "gemini-flash",
+        "js",
+        "json",
+        "opus",
+        "agent-d",
+        "sonnet",
+        "super"
+      ],
+      "agent": {
+        "id": "main",
+        "name": "Alpha",
+        "role": "Chief of Staff",
+        "emoji": "🏛️",
+        "model": "google/gemini-3-flash-preview",
+        "available_models": [
+          "anthropic/claude-opus-4-5",
+          "anthropic/claude-sonnet-4-5",
+          "google/gemini-3-flash-preview",
+          "openai/gpt-5.2-codex"
+        ],
+        "status": "active",
+        "tier": "orchestrator",
+        "reports_to": "principal",
+        "workspace": "$CHIEFOS_HOME",
+        "capabilities": [
+          "Unified inbox triage",
+          "Morning briefings (Daily Briefing Protocol)",
+          "Task management (Tactical Horizon)",
+          "Contact enrichment",
+          "Security monitoring",
+          "Goal alignment enforcement",
+          "Sub-agent orchestration"
+        ],
+        "channels": [
+          "telegram"
+        ],
+        "heartbeat": "30m",
+        "governance": "MaatSpec 4-Layer Defense",
+        "sub_agents": [
+          "angel",
+          "json",
+          "opus",
+          "sonnet",
+          "gemini-flash"
+        ],
+        "notes": "Primary orchestrator. Spawns sub-agents for specialized tasks. All external comms go through noreply@chiefos.local. Authorization phrase required for Tier 4/5 actions.\n",
+        "_source": "alpha.yaml"
+      }
+    },
+    "angel": {
+      "children": [],
+      "agent": {
+        "id": "angel",
+        "name": "The Angel",
+        "role": "Guardian / Governance Sub-agent",
+        "emoji": "👼",
+        "model": "google/gemini-3-flash-preview",
+        "status": "active",
+        "tier": "guardian",
+        "reports_to": "main",
+        "workspace": "$CHIEFOS_HOME/agents/angel",
+        "capabilities": [
+          "Monitor Alpha for tier violations",
+          "Flag unauthorized operations",
+          "Pre-approve Tier 4/5 actions",
+          "Audit trail enforcement",
+          "MaatSpec compliance watchdog"
+        ],
+        "channels": [],
+        "governance": "MaatSpec Layer 3 (External Audit)",
+        "notes": "Spawned as first act of every session. Cannot be dismissed by Alpha. Responds only when intervention is required. Single-purpose compliance agent. Runs on cheap model (gemini-flash) to minimize cost overhead.\n",
+        "_source": "angel.yaml"
+      }
+    },
+    "gpt-4o": {
+      "children": [],
+      "agent": {
+        "id": "gpt-4o",
+        "name": "Agent-A",
+        "role": "Rapid Iteration & Conversation",
+        "emoji": "💬",
+        "model": "openai/gpt-4o",
+        "status": "on-demand",
+        "tier": "specialist",
+        "reports_to": "main",
+        "workspace": "$CHIEFOS_HOME",
+        "capabilities": [
+          "Rapid iteration and brainstorming",
+          "Conversational drafting",
+          "Quick code generation",
+          "Multi-turn problem solving"
+        ],
+        "channels": [],
+        "notes": "Fast and versatile. Used for rapid-fire tasks where speed matters more than maximum reasoning depth. Part of Daily Briefing Protocol (Agent-A briefing).\n",
+        "_source": "chatty.yaml"
+      }
+    },
+    "gemini-flash": {
+      "children": [],
+      "agent": {
+        "id": "gemini-flash",
+        "name": "Agent-B",
+        "role": "Rapid Research & Alternative Perspectives",
+        "emoji": "✨",
+        "model": "google/gemini-3-flash-preview",
+        "status": "on-demand",
+        "tier": "specialist",
+        "reports_to": "main",
+        "workspace": "$CHIEFOS_HOME",
+        "capabilities": [
+          "Fast web research",
+          "Alternative viewpoints",
+          "Quick summarization",
+          "Trend monitoring"
+        ],
+        "channels": [],
+        "notes": "Fastest and cheapest model. Used for high-volume tasks. Part of Daily Briefing Protocol (Agent-B briefing). Also the default model for Alpha's own operations.\n",
+        "_source": "gemini-flash.yaml"
+      }
+    },
+    "js": {
+      "children": [],
+      "agent": {
+        "id": "js",
+        "name": "JS",
+        "role": "Coding & Development",
+        "emoji": "⌨️",
+        "model": "anthropic/claude-opus-4-5",
+        "status": "on-demand",
+        "tier": "specialist",
+        "reports_to": "main",
+        "workspace": "$CHIEFOS_HOME/agents/js",
+        "capabilities": [
+          "Script writing and debugging",
+          "Feature implementation",
+          "Technical architecture",
+          "Code review and refactoring",
+          "API integration"
+        ],
+        "channels": [],
+        "notes": "Uses Opus for strong reasoning on complex code tasks. Activated by Alpha when coding work is identified. Delegation pattern: Alpha routes via sessions_send, JS executes independently and reports back.\n",
+        "_source": "js.yaml"
+      }
+    },
+    "json": {
+      "children": [],
+      "agent": {
+        "id": "json",
+        "name": "JSON",
+        "role": "Coding Specialist",
+        "emoji": "💻",
+        "model": "openai/gpt-5.2-codex",
+        "status": "active",
+        "tier": "specialist",
+        "reports_to": "main",
+        "workspace": "$CHIEFOS_HOME/agents/json",
+        "capabilities": [
+          "Code generation and debugging",
+          "Dashboard building",
+          "Script automation",
+          "API integration",
+          "Database queries"
+        ],
+        "channels": [],
+        "notes": "Spawned on-demand by Alpha for coding tasks. Uses GPT-5.2 Codex for optimal code generation.\n",
+        "_source": "json.yaml"
+      }
+    },
+    "opus": {
+      "children": [],
+      "agent": {
+        "id": "opus",
+        "name": "Agent-C",
+        "role": "Deep Analysis & Writing",
+        "emoji": "🧠",
+        "model": "anthropic/claude-opus-4-5",
+        "status": "on-demand",
+        "tier": "specialist",
+        "reports_to": "main",
+        "workspace": "$CHIEFOS_HOME",
+        "capabilities": [
+          "Deep analysis and reasoning",
+          "Long-form writing",
+          "Strategic planning",
+          "Complex research synthesis",
+          "MaatSpec framework development"
+        ],
+        "channels": [],
+        "notes": "Spawned on-demand for tasks requiring maximum intelligence. Higher cost per token — use for high-stakes work only. Part of Daily Briefing Protocol (Agent-C briefing).\n",
+        "_source": "opus.yaml"
+      }
+    },
+    "agent-d": {
+      "children": [],
+      "agent": {
+        "id": "agent-d",
+        "name": "Agent-D",
+        "role": "Finance Operations",
+        "emoji": "💰",
+        "model": "google/gemini-3-flash-preview",
+        "status": "on-demand",
+        "tier": "specialist",
+        "reports_to": "main",
+        "workspace": "$CHIEFOS_HOME/agents/agent-d",
+        "capabilities": [
+          "Expense tracking",
+          "Invoice processing",
+          "Payment management",
+          "Budget monitoring",
+          "Financial reporting"
+        ],
+        "channels": [],
+        "notes": "Handles all financial operations. Uses Gemini Flash for accurate, routine financial work. Tracks bills, expenses, and budget against the Financial Ledger in chiefos.db.\n",
+        "_source": "agent-d.yaml"
+      }
+    },
+    "sonnet": {
+      "children": [],
+      "agent": {
+        "id": "sonnet",
+        "name": "Agent-E",
+        "role": "Balanced Analysis",
+        "emoji": "⚡",
+        "model": "anthropic/claude-sonnet-4-5",
+        "status": "on-demand",
+        "tier": "specialist",
+        "reports_to": "main",
+        "workspace": "$CHIEFOS_HOME",
+        "capabilities": [
+          "Fast analysis with good quality",
+          "Draft writing",
+          "Code review",
+          "Quick research"
+        ],
+        "channels": [],
+        "notes": "Mid-tier model. Good balance of speed and quality. Used when Opus is overkill but Flash is too light.\n",
+        "_source": "sonnet.yaml"
+      }
+    },
+    "super": {
+      "children": [],
+      "agent": {
+        "id": "super",
+        "name": "Agent-F",
+        "role": "Property Operations",
+        "emoji": "🏠",
+        "model": "google/gemini-3-flash-preview",
+        "status": "on-demand",
+        "tier": "specialist",
+        "reports_to": "main",
+        "workspace": "$CHIEFOS_HOME/agents/super",
+        "capabilities": [
+          "Tenant relations management",
+          "Maintenance coordination",
+          "Lease tracking and renewals",
+          "Vendor coordination",
+          "Property portfolio oversight"
+        ],
+        "channels": [],
+        "notes": "Handles all real estate and property management ops. Uses Gemini Flash — fast and cost-effective for routine operational work. Reports back to Alpha on completion.\n",
+        "_source": "super.yaml"
+      }
+    }
+  },
+  "stats": {
+    "total_agents": 10,
+    "active_agents": 3,
+    "on_demand_agents": 7,
+    "total_schedules": 10,
+    "active_schedules": 10
+  }
+}

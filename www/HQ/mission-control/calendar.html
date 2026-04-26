@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mission Control — Calendar</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f; --bg-card: #12121a; --bg-card-hover: #1a1a25;
+    --text: #e8e6e3; --text-dim: #9ca3af; --text-muted: #6b7280;
+    --gold: #c9a84c; --gold-dim: rgba(201,168,76,0.15);
+    --green: #34d399; --green-dim: rgba(52,211,153,0.15);
+    --blue: #60a5fa; --blue-dim: rgba(96,165,250,0.15);
+    --purple: #a78bfa; --purple-dim: rgba(167,139,250,0.15);
+    --red: #f87171; --orange: #fb923c;
+    --border: rgba(255,255,255,0.06); --border-gold: rgba(201,168,76,0.25);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+  .mono { font-family:'JetBrains Mono',monospace; font-size:0.8rem; }
+
+  nav {
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    background:rgba(10,10,15,0.85); backdrop-filter:blur(20px);
+    border-bottom:1px solid var(--border); height:56px;
+    display:flex; align-items:center; justify-content:space-between; padding:0 2rem;
+  }
+  .nav-brand { display:flex; align-items:center; gap:0.6rem; text-decoration:none; }
+  .nav-brand span:first-child { font-size:1.2rem; }
+  .nav-brand span:last-child { font-size:0.95rem; font-weight:600; color:var(--text); letter-spacing:-0.02em; }
+  .nav-brand .gold { color:var(--gold); }
+  .nav-links { display:flex; gap:0.25rem; }
+  .nav-links a {
+    padding:0.45rem 1rem; border-radius:6px; font-size:0.82rem; font-weight:500;
+    text-decoration:none; color:var(--text-dim); transition:all 0.2s;
+  }
+  .nav-links a:hover { color:var(--text); background:rgba(255,255,255,0.04); }
+  .nav-links a.active { color:var(--gold); background:var(--gold-dim); }
+  .nav-meta { font-size:0.75rem; color:var(--text-muted); }
+
+  main { padding:80px 2rem 3rem; max-width:1100px; margin:0 auto; }
+  h1 { font-size:1.6rem; font-weight:700; letter-spacing:-0.03em; margin-bottom:0.3rem; }
+  .subtitle { color:var(--text-dim); font-size:0.9rem; margin-bottom:2rem; }
+
+  /* TIMELINE */
+  .timeline { position:relative; padding-left:3rem; }
+  .timeline::before {
+    content:''; position:absolute; left:14px; top:0; bottom:0; width:2px;
+    background:linear-gradient(180deg, var(--gold) 0%, var(--border) 30%, var(--border) 100%);
+  }
+
+  .time-block { margin-bottom:2rem; position:relative; }
+  .time-label {
+    position:absolute; left:-3rem; top:0.15rem;
+    font-family:'JetBrains Mono',monospace; font-size:0.72rem; color:var(--text-muted);
+    width:3rem; text-align:right; padding-right:1.2rem;
+  }
+  .time-dot {
+    position:absolute; left:-8px; top:0.35rem; width:12px; height:12px;
+    border-radius:50%; border:2px solid var(--bg);
+  }
+  .time-dot.active { background:var(--green); box-shadow:0 0 10px rgba(52,211,153,0.4); }
+  .time-dot.scheduled { background:var(--gold); }
+  .time-dot.recurring { background:var(--blue); }
+
+  .schedule-card {
+    background:var(--bg-card); border:1px solid var(--border); border-radius:10px;
+    padding:1rem 1.2rem; margin-left:1rem; transition:all 0.2s;
+  }
+  .schedule-card:hover { border-color:var(--border-gold); transform:translateX(4px); }
+
+  .sched-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:0.5rem; }
+  .sched-name { font-weight:700; font-size:0.95rem; }
+  .sched-cron {
+    font-family:'JetBrains Mono',monospace; font-size:0.7rem;
+    padding:0.15rem 0.5rem; border-radius:4px;
+    background:rgba(255,255,255,0.04); color:var(--text-muted); border:1px solid var(--border);
+  }
+  .sched-desc { font-size:0.82rem; color:var(--text-dim); line-height:1.5; margin-bottom:0.6rem; }
+
+  .sched-meta { display:flex; gap:1rem; flex-wrap:wrap; }
+  .sched-tag {
+    font-size:0.7rem; padding:0.15rem 0.5rem; border-radius:4px;
+    display:flex; align-items:center; gap:0.3rem;
+  }
+  .sched-tag.agent { background:var(--gold-dim); color:var(--gold); }
+  .sched-tag.script { background:rgba(255,255,255,0.04); color:var(--text-muted); font-family:'JetBrains Mono',monospace; }
+  .sched-tag.sub { background:var(--purple-dim); color:var(--purple); }
+
+  /* NOW INDICATOR */
+  .now-marker {
+    position:relative; margin:1.5rem 0; padding-left:1rem;
+  }
+  .now-marker::before {
+    content:'NOW'; position:absolute; left:-3rem;
+    font-family:'JetBrains Mono',monospace; font-size:0.65rem; font-weight:600;
+    color:var(--red); letter-spacing:0.08em; top:50%; transform:translateY(-50%);
+    width:3rem; text-align:right; padding-right:1.2rem;
+  }
+  .now-marker .line {
+    height:1px; background:linear-gradient(90deg, var(--red) 0%, transparent 100%);
+    position:relative;
+  }
+  .now-marker .dot {
+    position:absolute; left:-8px; top:-4px; width:10px; height:10px;
+    border-radius:50%; background:var(--red); box-shadow:0 0 10px rgba(248,113,113,0.5);
+    animation:pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  .loading { text-align:center; padding:4rem; color:var(--text-dim); }
+  .loading-spinner { display:inline-block; width:20px; height:20px; border:2px solid var(--border); border-top-color:var(--gold); border-radius:50%; animation:spin 0.8s linear infinite; margin-right:0.5rem; vertical-align:middle; }
+  @keyframes spin { to{transform:rotate(360deg)} }
+
+  /* 24H HEATMAP */
+  .heatmap { display:flex; gap:2px; margin-bottom:2.5rem; align-items:flex-end; }
+  .heat-hour {
+    flex:1; min-width:0; border-radius:4px 4px 0 0; min-height:8px;
+    transition:all 0.2s; cursor:default; position:relative;
+  }
+  .heat-hour:hover { opacity:0.8; }
+  .heat-hour .tooltip {
+    display:none; position:absolute; bottom:calc(100% + 6px); left:50%; transform:translateX(-50%);
+    background:#1e1e2e; border:1px solid var(--border); border-radius:6px; padding:0.4rem 0.6rem;
+    font-size:0.7rem; white-space:nowrap; z-index:10; color:var(--text-dim);
+  }
+  .heat-hour:hover .tooltip { display:block; }
+  .heat-labels { display:flex; gap:2px; margin-bottom:0.5rem; }
+  .heat-labels span {
+    flex:1; text-align:center; font-size:0.6rem; color:var(--text-muted);
+    font-family:'JetBrains Mono',monospace;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="team.html">
+    <span>🎯</span><span>Mission <span class="gold">Control</span></span>
+  </a>
+  <div class="nav-links">
+    <a href="team.html">Team</a>
+    <a href="calendar.html" class="active">Calendar</a>
+    <a href="/HQ/office/">Office</a>
+  </div>
+  <div class="nav-meta"><span class="mono" id="nav-time"></span></div>
+</nav>
+
+<main>
+  <h1>Schedule & Cron Jobs</h1>
+  <p class="subtitle">24-hour activity map and upcoming automated tasks</p>
+
+  <div id="heatmap-section"></div>
+  <div id="timeline" class="timeline">
+    <div class="loading"><span class="loading-spinner"></span>Loading schedule…</div>
+  </div>
+</main>
+
+<script>
+const DATA_URL = 'mission-control.json';
+
+function updateClock() {
+  const el = document.getElementById('nav-time');
+  if (el) el.textContent = new Date().toLocaleString('en-CA', { timeZone:'$TZ', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false }) + ' EST';
+}
+setInterval(updateClock, 1000); updateClock();
+
+function parseCronHours(cron) {
+  if (!cron) return [];
+  const parts = cron.split(' ');
+  const minute = parts[0], hour = parts[1];
+  let hours = [];
+  if (hour === '*') {
+    if (minute.startsWith('*/')) { for (let h=0;h<24;h++) hours.push(h); }
+    else { for (let h=0;h<24;h++) hours.push(h); }
+  } else if (hour.includes(',')) {
+    hours = hour.split(',').map(Number);
+  } else {
+    hours = [parseInt(hour)];
+  }
+  return hours;
+}
+
+function renderHeatmap(schedules) {
+  const hourCounts = new Array(24).fill(0);
+  const hourJobs = new Array(24).fill(null).map(() => []);
+
+  schedules.forEach(s => {
+    const hours = parseCronHours(s.cron);
+    hours.forEach(h => {
+      hourCounts[h]++;
+      hourJobs[h].push(s.name);
+    });
+  });
+
+  const max = Math.max(...hourCounts, 1);
+  const section = document.getElementById('heatmap-section');
+
+  const labels = Array.from({length:24}, (_,i) =>
+    `<span>${i.toString().padStart(2,'0')}</span>`
+  ).join('');
+
+  const bars = hourCounts.map((count, i) => {
+    const height = Math.max(8, (count / max) * 60);
+    const intensity = count / max;
+    const color = count === 0 ? 'rgba(255,255,255,0.03)' :
+                  `rgba(201,168,76,${0.2 + intensity * 0.8})`;
+    const jobList = hourJobs[i].join(', ') || 'No jobs';
+    const now = new Date();
+    const currentHour = parseInt(now.toLocaleString('en-CA', {timeZone:'$TZ', hour:'2-digit', hour12:false}));
+    const border = i === currentHour ? 'border:1px solid var(--red);' : '';
+    return `<div class="heat-hour" style="height:${height}px;background:${color};${border}"><div class="tooltip">${i.toString().padStart(2,'0')}:00 — ${count} job${count!==1?'s':''}<br>${jobList}</div></div>`;
+  }).join('');
+
+  section.innerHTML = `
+    <div style="margin-bottom:2.5rem">
+      <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.5rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em">24-Hour Activity Heatmap</div>
+      <div class="heat-labels">${labels}</div>
+      <div class="heatmap">${bars}</div>
+    </div>
+  `;
+}
+
+function renderTimeline(data) {
+  const timeline = document.getElementById('timeline');
+  const schedules = data.schedules;
+  const agentMap = {};
+  data.agents.forEach(a => agentMap[a.id] = a);
+
+  // Sort by first cron hour
+  const sorted = [...schedules].sort((a, b) => {
+    const ha = parseCronHours(a.cron);
+    const hb = parseCronHours(b.cron);
+    return (ha[0] || 0) - (hb[0] || 0);
+  });
+
+  // Find current hour for NOW marker
+  const now = new Date();
+  const currentHour = parseInt(now.toLocaleString('en-CA', {timeZone:'$TZ', hour:'2-digit', hour12:false}));
+  let nowInserted = false;
+
+  let html = '';
+  sorted.forEach(s => {
+    const hours = parseCronHours(s.cron);
+    const firstHour = hours[0] || 0;
+
+    // Insert NOW marker
+    if (!nowInserted && firstHour > currentHour) {
+      html += `<div class="now-marker"><div class="line"><div class="dot"></div></div></div>`;
+      nowInserted = true;
+    }
+
+    const timeStr = s.time_human || s.cron;
+    const agent = agentMap[s.agent];
+    const isRecurring = s.cron && (s.cron.includes('*/') || s.cron.split(' ')[1] === '*');
+    const dotClass = isRecurring ? 'recurring' : 'scheduled';
+
+    const subAgentTags = (s.sub_agents || []).map(id => {
+      const sa = agentMap[id];
+      return `<span class="sched-tag sub">${sa ? sa.emoji + ' ' + sa.name : id}</span>`;
+    }).join('');
+
+    html += `
+      <div class="time-block">
+        <div class="time-label">${String(firstHour).padStart(2,'0')}:${(s.cron||'').split(' ')[0]==='0'?'00':((s.cron||'').split(' ')[0]||'00').padStart(2,'0')}</div>
+        <div class="time-dot ${dotClass}"></div>
+        <div class="schedule-card">
+          <div class="sched-header">
+            <span class="sched-name">${s.name}</span>
+            <span class="sched-cron">${s.cron || '—'}</span>
+          </div>
+          <div class="sched-desc">${(s.description || '').trim()}</div>
+          <div class="sched-meta">
+            <span class="sched-tag agent">${agent ? agent.emoji + ' ' + agent.name : s.agent}</span>
+            ${s.script ? `<span class="sched-tag script">${s.script}</span>` : ''}
+            ${subAgentTags}
+          </div>
+        </div>
+      </div>
+    `;
+  });
+
+  if (!nowInserted) {
+    html += `<div class="now-marker"><div class="line"><div class="dot"></div></div></div>`;
+  }
+
+  timeline.innerHTML = html;
+}
+
+fetch(DATA_URL)
+  .then(r => r.json())
+  .then(data => {
+    renderHeatmap(data.schedules);
+    renderTimeline(data);
+  })
+  .catch(() => {
+    document.getElementById('timeline').innerHTML =
+      `<div class="loading" style="color:var(--red)">Failed to load. Run <code class="mono">./build.sh</code></div>`;
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alpha System Architecture</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            background-color: #0f172a; 
+            color: #f8fafc; 
+            font-family: 'Inter', sans-serif; 
+            line-height: 1.6;
+        }
+        .glass { 
+            background: rgba(30, 41, 59, 0.7); 
+            backdrop-filter: blur(10px); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+        }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .gradient-text {
+            background: linear-gradient(to right, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #334155; }
+    </style>
+</head>
+<body class="min-h-screen bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-slate-900 via-slate-900 to-black pb-20">
+    <div class="max-w-6xl mx-auto px-6">
+        <div class="pt-8">
+            <a href="/HQ/" class="inline-flex items-center gap-2 text-slate-500 hover:text-sky-400 transition-colors text-xs font-bold uppercase tracking-[0.2em] group">
+                <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                Back to Dashboard
+            </a>
+        </div>
+        <!-- Header -->
+        <div class="flex items-center justify-between py-12">
+            <div class="flex items-center gap-6">
+                <a href="/HQ/" class="p-3 rounded-2xl bg-slate-800/50 hover:bg-slate-700 transition-all border border-slate-700/50 group">
+                    <svg class="w-6 h-6 text-slate-400 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                </a>
+                <div>
+                    <h1 class="text-4xl font-extrabold tracking-tight mb-2">System Architecture</h1>
+                    <p class="text-slate-400 font-medium">Core Data Structures & MaatSpec Governance Map</p>
+                </div>
+            </div>
+            <div class="hidden md:block text-right">
+                <div class="text-xs font-mono text-slate-500 uppercase tracking-widest mb-1">Database Instance</div>
+                <div class="text-sm font-semibold text-sky-400">chiefos.db v4.0</div>
+            </div>
+        </div>
+
+        <!-- ER Diagram Section -->
+        <section class="mb-16">
+            <div class="flex items-center justify-between mb-8">
+                <div class="flex items-center gap-3">
+                    <div class="h-1 w-8 bg-sky-500 rounded-full"></div>
+                    <h2 class="text-xl font-bold uppercase tracking-wider text-slate-200">Relational Mapping</h2>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="zoomMermaid(0.9)" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 hover:text-white transition-all shadow-lg" title="Zoom Out">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7"></path></svg>
+                    </button>
+                    <button onclick="zoomMermaid(1.1)" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 hover:text-white transition-all shadow-lg" title="Zoom In">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path></svg>
+                    </button>
+                    <button onclick="resetZoom()" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 hover:text-white transition-all shadow-lg" title="Reset">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    </button>
+                </div>
+            </div>
+            <div id="pan-container" class="glass p-4 rounded-[2rem] border-sky-500/20 overflow-hidden relative bg-slate-900/20 cursor-grab active:cursor-grabbing" style="max-height: 800px;">
+                <div id="mermaid-container" class="transition-transform duration-200 origin-top-left p-4 select-none">
+                    <div class="mermaid bg-slate-900/40 p-8 rounded-2xl border border-slate-800">
+erDiagram
+    MAAT_AUDIT_TRAIL ||--o{ TACTICAL_HORIZON : "validates"
+    SYSTEM_AGENTS ||--o{ AGENT_STATE_HISTORY : "defines"
+    SYSTEM_TOOLS ||--o{ MAAT_AUDIT_TRAIL : "audited_by"
+    SOCIAL_POSTS ||--o{ ALPHA_BLOG_POSTS : "promotes"
+    TACTICAL_HORIZON ||--o{ ALPHA_BLOG_POSTS : "tracks"
+
+    ASSET_REGISTRY {
+        string id PK
+        string name
+        string type
+        string status
+        string last_maintenance
+    }
+    SYSTEM_AGENTS {
+        int id PK
+        string agent_id
+        string name
+        string domain
+    }
+    SYSTEM_TOOLS {
+        int id PK
+        string tool_name
+        string description
+        int tier
+    }
+    ASSET_UTILITIES {
+        int id PK
+        int asset_id FK
+        string vendor
+        string account_number
+    }
+    FINANCIAL_LEDGER {
+        int id PK
+        string asset_id FK
+        float amount
+        string status
+    }
+    TACTICAL_HORIZON {
+        int id PK
+        string task
+        string priority
+        int parent_mission_id FK
+    }
+    PERIMETER_LOGS {
+        int id PK
+        string event_type
+        string ip_address
+    }
+    ALPHA_BLOG_POSTS {
+        int id PK
+        string title
+        string category
+        string status
+        int related_social_post_id FK
+        int related_task_id FK
+    }
+    SOCIAL_POSTS {
+        int id PK
+        string title
+        string status
+    }
+    CONTRACTOR_NETWORK {
+        int id PK
+        string name
+        string specialty
+    }
+    RECURRING_VULNERABILITIES {
+        int id PK
+        string name
+        float current_amount
+    }
+    ALPHA_CHRONICLES {
+        int id PK
+        string component
+        string event
+    }
+    ALPHA_INTEL {
+        string key PK
+        string value
+    }
+    MAAT_AUDIT_TRAIL {
+        int id PK
+        int tier
+        string verdict
+    }
+    CONTEXT_VAULT {
+        int id PK
+        string concept
+        string sentiment
+    }
+    ALPHA_ROUTINES {
+        int id PK
+        string routine_name
+        string status
+    }
+    USAGE_LEDGER {
+        int id PK
+        string model
+        float cost_estimate
+    }
+    PROJECT_METADATA {
+        int id PK
+        string project_name
+        string status
+    }
+    AGENT_STATE_HISTORY {
+        int id PK
+        string agent_id
+        string action
+    }
+    SYSTEM_ENVIRONMENT {
+        string key PK
+        string value
+    }
+            </div>
+            </div>
+        </section>
+
+        <!-- Data Dictionary Section -->
+        <section>
+            <div class="flex items-center gap-3 mb-8">
+                <div class="h-1 w-8 bg-indigo-500 rounded-full"></div>
+                <h2 class="text-xl font-bold uppercase tracking-wider text-slate-200">Data Dictionary</h2>
+            </div>
+
+            <div class="space-y-6">
+                <!-- Operational Group -->
+                <div class="glass overflow-hidden rounded-[2rem]">
+                    <div class="bg-slate-800/40 px-8 py-4 border-b border-slate-700/50">
+                        <h3 class="text-sm font-bold uppercase tracking-[0.2em] text-sky-400">Operational Assets</h3>
+                    </div>
+                    <div class="divide-y divide-slate-700/30">
+                        <div class="p-8 hover:bg-white/5 transition-colors">
+                            <div class="flex flex-col md:flex-row md:items-start gap-4">
+                                <div class="mono text-sky-400 font-bold min-w-[240px]">table_Asset_Registry</div>
+                                <div class="text-slate-300">The master inventory for all physical and significant digital assets (e.g., properties, vehicles, server hardware). Tracks real-time status, maintenance cycles, and property-specific notes.</div>
+                            </div>
+                        </div>
+                        <div class="p-8 hover:bg-white/5 transition-colors">
+                            <div class="flex flex-col md:flex-row md:items-start gap-4">
+                                <div class="mono text-sky-400 font-bold min-w-[240px]">table_Asset_Utilities</div>
+                                <div class="text-slate-300">Connects assets to their service infrastructure. Maps account numbers, vendor portals, and specific support contacts to the parent asset for rapid troubleshooting.</div>
+                            </div>
+                        </div>
+                        <div class="p-8 hover:bg-white/5 transition-colors">
+                            <div class="flex flex-col md:flex-row md:items-start gap-4">
+                                <div class="mono text-sky-400 font-bold min-w-[240px]">table_Contractor_Network</div>
+                                <div class="text-slate-300">A vetted directory of external service providers. Includes historical ratings, specialty tags, and direct contact details for maintenance and mission-specific work.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Strategic Group -->
+                <div class="glass overflow-hidden rounded-[2rem]">
+                    <div class="bg-slate-800/40 px-8 py-4 border-b border-slate-700/50">
+                        <h3 class="text-sm font-bold uppercase tracking-[0.2em] text-indigo-400">Strategy & Execution</h3>
+                    </div>
+                    <div class="divide-y divide-slate-700/30">
+                        <div class="p-8 hover:bg-white/5 transition-colors">
+                            <div class="flex flex-col md:flex-row md:items-start gap-4">
+                                <div class="mono text-indigo-400 font-bold min-w-[240px]">table_Tactical_Horizon</div>
+                                <div class="text-slate-300">The centralized task-orchestration engine. Manages short-term tasks and long-term milestones, organized by priority, deadline, and hierarchical Mission IDs.</div>
+                            </div>
+                        </div>
+                        <div class="p-8 hover:bg-white/5 transition-colors">
+                            <div class="flex flex-col md:flex-row md:items-start gap-4">
+                                <div class="mono text-indigo-400 font-bold min-w-[240px]">table_Social_Posts</div>
+                                <div class="text-slate-300">A creative repository for high-leverage content. Stores hooks, final drafts, and scheduling metadata for social platforms (LinkedIn, Twitter) to ensure consistent strategic messaging.</div>
+                            </div>
+                        </div>
+                        <div class="p-8 hover:bg-white/5 transition-colors">
+                            <div class="flex flex-col md:flex-row md:items-start gap-4">
+                                <div class="mono text-indigo-400 font-bold min-w-[240px]">table_Alpha_Blog_Posts</div>
+                                <div class="text-slate-300">The content engine. Tracks technical blog posts, draft status, and category tags. Cross-linked to tactical tasks for production and social posts for distribution.</div>
+                            </div>
+                        </div>
+                        <div class="p-8 hover:bg-white/5 transition-colors">
+                            <div class="flex flex-col md:flex-row md:items-start gap-4">
+                                <div class="mono text-indigo-400 font-bold min-w-[240px]">table_Context_Vault</div>
+                                <div class="text-slate-300">Long-term knowledge base for evolving concepts. Captures strategic breakthroughs, implementation links, and the Principal's current sentiment on project directions.</div>
+                            </div>
+                        </div>
+                        <div class="p-8 hover:bg-white/5 transition-colors">
+                            <div class="flex flex-col md:flex-row md:items-start gap-4">
+                                <div class="mono text-indigo-400 font-bold min-w-[240px]">project_metadata</div>
+                                <div class="text-slate-300">High-level project definitions. Tracks the lifecycle, status, and updated descriptions of active development and business initiatives.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Financial Group -->
+                <div class="glass overflow-hidden rounded-[2rem]">
+                    <div class="bg-slate-800/40 px-8 py-4 border-b border-slate-700/50">
+                        <h3 class="text-sm font-bold uppercase tracking-[0.2em] text-emerald-400">Financial Intelligence</h3>
+                    </div>
+                    <div class="divide-y divide-slate-700/30">
+                        <div class="p-8 hover:bg-white/5 transition-colors">
+                            <div class="flex flex-col md:flex-row md:items-start gap-4">
+                                <div class="mono text-emerald-400 font-bold min-w-[240px]">table_Financial_Ledger</div>
+                                <div class="text-slate-300">Operational expense tracker. Records bills, payment status, and due dates linked directly to properties and assets for cash-flow visibility.</div>
+                            </div>
+                        </div>
+                        <div class="p-8 hover:bg-white/5 transition-colors">
+                            <div class="flex flex-col md:flex-row md:items-start gap-4">
+                                <div class="mono text-emerald-400 font-bold min-w-[240px]">table_Recurring_Vulnerabilities</div>
+                                <div class="text-slate-300">A specialized subscription and SaaS auditor. Monitors recurring costs for trend shifts, price increases, or redundant service "vulnerabilities."</div>
+                            </div>
+                        </div>
+                        <div class="p-8 hover:bg-white/5 transition-colors">
+                            <div class="flex flex-col md:flex-row md:items-start gap-4">
+                                <div class="mono text-emerald-400 font-bold min-w-[240px]">table_Usage_Ledger</div>
+                                <div class="text-slate-300">Real-time resource audit. Logs AI model interactions, token burn, and estimated session costs to manage the Alpha operational budget.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Governance Group -->
+                <div class="glass overflow-hidden rounded-[2rem]">
+                    <div class="bg-slate-800/40 px-8 py-4 border-b border-slate-700/50">
+                        <h3 class="text-sm font-bold uppercase tracking-[0.2em] text-rose-400">Governance & Security</h3>
+                    </div>
+                    <div class="divide-y divide-slate-700/30">
+                        <div class="p-8 hover:bg-white/5 transition-colors">
+                            <div class="flex flex-col md:flex-row md:items-start gap-4">
+                                <div class="mono text-rose-400 font-bold min-w-[240px]">table_Maat_Audit_Trail</div>
+                                <div class="text-slate-300">The primary compliance log. Records every tiered action, the rationale for classification, and the Guardian's verdict to ensure MaatSpec alignment.</div>
+                            </div>
+                        </div>
+                        <div class="p-8 hover:bg-white/5 transition-colors">
+                            <div class="flex flex-col md:flex-row md:items-start gap-4">
+                                <div class="mono text-rose-400 font-bold min-w-[240px]">table_Perimeter_Logs</div>
+                                <div class="text-slate-300">Security perimeter surveillance. Captures access events, IP metadata, and connection status to maintain system integrity.</div>
+                            </div>
+                        </div>
+                        <div class="p-8 hover:bg-white/5 transition-colors">
+                            <div class="flex flex-col md:flex-row md:items-start gap-4">
+                                <div class="mono text-rose-400 font-bold min-w-[240px]">agent_state_history</div>
+                                <div class="text-slate-300">A granular activity log for sub-agents. Records the internal transitions and specific tool-calls of specialized agents (JS, Super, Agent-D).</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Group -->
+                <div class="glass overflow-hidden rounded-[2rem]">
+                    <div class="bg-slate-800/40 px-8 py-4 border-b border-slate-700/50">
+                        <h3 class="text-sm font-bold uppercase tracking-[0.2em] text-slate-400">System Intelligence</h3>
+                    </div>
+                    <div class="divide-y divide-slate-700/30">
+                        <div class="p-8 hover:bg-white/5 transition-colors">
+                            <div class="flex flex-col md:flex-row md:items-start gap-4">
+                                <div class="mono text-slate-400 font-bold min-w-[240px]">table_System_Agents</div>
+                                <div class="text-slate-300">Master agent roster and coordination data. Stores agent identities, designated domains, models, and directory scopes for the Alpha orchestrator.</div>
+                            </div>
+                        </div>
+                        <div class="p-8 hover:bg-white/5 transition-colors">
+                            <div class="flex flex-col md:flex-row md:items-start gap-4">
+                                <div class="mono text-slate-400 font-bold min-w-[240px]">table_System_Tools</div>
+                                <div class="text-slate-300">A structured catalog of all available system tools. Includes Tier classifications, descriptions, and restricted status for governance audits.</div>
+                            </div>
+                        </div>
+                        <div class="p-8 hover:bg-white/5 transition-colors">
+                            <div class="flex flex-col md:flex-row md:items-start gap-4">
+                                <div class="mono text-slate-400 font-bold min-w-[240px]">table_Alpha_Intel</div>
+                                <div class="text-slate-300">Persistent key/value store for the Alpha kernel. Used for managing operational state across sessions (e.g., email sync checkpoints).</div>
+                            </div>
+                        </div>
+                        <div class="p-8 hover:bg-white/5 transition-colors">
+                            <div class="flex flex-col md:flex-row md:items-start gap-4">
+                                <div class="mono text-slate-400 font-bold min-w-[240px]">table_Alpha_Routines</div>
+                                <div class="text-slate-300">Definitions for automated workflows. Stores the sequences, time windows, and requirements for recurring system tasks.</div>
+                            </div>
+                        </div>
+                        <div class="p-8 hover:bg-white/5 transition-colors">
+                            <div class="flex flex-col md:flex-row md:items-start gap-4">
+                                <div class="mono text-slate-400 font-bold min-w-[240px]">table_Alpha_Chronicles</div>
+                                <div class="text-slate-300">Self-improvement and failure log. Records system component events, error logs, and "lessons learned" for future recursive optimization.</div>
+                            </div>
+                        </div>
+                        <div class="p-8 hover:bg-white/5 transition-colors">
+                            <div class="flex flex-col md:flex-row md:items-start gap-4">
+                                <div class="mono text-slate-400 font-bold min-w-[240px]">system_environment</div>
+                                <div class="text-slate-300">Global environment variables. Stores core runtime configuration, descriptions, and update timestamps for the Alpha OS.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', securityLevel: 'loose' });
+
+        let currentScale = 1;
+        function zoomMermaid(factor) {
+            currentScale *= factor;
+            document.getElementById('mermaid-container').style.transform = `scale(${currentScale})`;
+        }
+        function resetZoom() {
+            currentScale = 1;
+            document.getElementById('mermaid-container').style.transform = 'scale(1)';
+        }
+
+        // Panning Logic
+        const panContainer = document.getElementById('pan-container');
+        let isDown = false;
+        let startX;
+        let startY;
+        let scrollLeft;
+        let scrollTop;
+
+        panContainer.addEventListener('mousedown', (e) => {
+            isDown = true;
+            startX = e.pageX - panContainer.offsetLeft;
+            startY = e.pageY - panContainer.offsetTop;
+            scrollLeft = panContainer.scrollLeft;
+            scrollTop = panContainer.scrollTop;
+        });
+        panContainer.addEventListener('mouseleave', () => {
+            isDown = false;
+        });
+        panContainer.addEventListener('mouseup', () => {
+            isDown = false;
+        });
+        panContainer.addEventListener('mousemove', (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - panContainer.offsetLeft;
+            const y = e.pageY - panContainer.offsetTop;
+            const walkX = (x - startX);
+            const walkY = (y - startY);
+            panContainer.scrollLeft = scrollLeft - walkX;
+            panContainer.scrollTop = scrollTop - walkY;
+        });
+    </script>
+</body>
+</html>

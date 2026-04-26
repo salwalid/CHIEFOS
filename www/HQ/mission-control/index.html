@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mission Control | Alpha HQ</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --bg-card: #12121a;
+    --bg-card-hover: #1a1a25;
+    --text: #e8e6e3;
+    --text-dim: #9ca3af;
+    --text-muted: #6b7280;
+    --gold: #c9a84c;
+    --border: rgba(255,255,255,0.07);
+    --border-gold: rgba(201,168,76,0.35);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+  }
+  .header {
+    padding: 18px 28px; display: flex; align-items: center; gap: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .back {
+    color: var(--gold); text-decoration: none; font-size: 20px;
+    transition: opacity 0.2s;
+  }
+  .back:hover { opacity: 0.6; }
+  .header-title {
+    font-size: 17px; font-weight: 700; letter-spacing: -0.02em;
+  }
+  .header-sub {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    color: var(--text-muted); letter-spacing: 0.12em; margin-top: 2px;
+  }
+  .main {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 48px 24px;
+  }
+  .grid {
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: 20px; max-width: 560px; width: 100%;
+  }
+  .card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 32px 28px;
+    text-decoration: none; color: var(--text);
+    display: flex; flex-direction: column; gap: 14px;
+    transition: all 0.2s;
+  }
+  .card:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--border-gold);
+    transform: translateY(-3px);
+  }
+  .card-icon { font-size: 28px; }
+  .card-title { font-size: 16px; font-weight: 700; letter-spacing: -0.02em; }
+  .card-desc {
+    font-size: 13px; color: var(--text-dim); line-height: 1.6;
+  }
+  @media (max-width: 640px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a href="/HQ/" class="back">←</a>
+  <div>
+    <div class="header-title">Mission Control</div>
+    <div class="header-sub">CHIEFOS HQ · AGENT OPERATIONS</div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="grid">
+    <a href="team.html" class="card">
+      <div class="card-icon">👥</div>
+      <div class="card-title">Team</div>
+      <div class="card-desc">Agent roster, capabilities, status, and role assignments.</div>
+    </a>
+    <a href="calendar.html" class="card">
+      <div class="card-icon">🗓️</div>
+      <div class="card-title">Calendar</div>
+      <div class="card-desc">Cron schedule timeline — what runs, when, and how often.</div>
+    </a>
+    <a href="/HQ/office/" class="card">
+      <div class="card-icon">🏢</div>
+      <div class="card-title">Office</div>
+      <div class="card-desc">Agent Office dashboard — live agent status and operational hub.</div>
+    </a>
+    <a href="/HQ/schema/" class="card">
+      <div class="card-icon">🗄️</div>
+      <div class="card-title">DB Schema</div>
+      <div class="card-desc">System architecture, table relations, and data structures.</div>
+    </a>
+    <a href="/HQ/org2/memory-map.html" class="card">
+      <div class="card-icon">🧠</div>
+      <div class="card-title">Memory Architecture</div>
+      <div class="card-desc">Context vault, knowledge index, and memory system map.</div>
+    </a>
+    <a href="/HQ/org2/" class="card">
+      <div class="card-icon">🔬</div>
+      <div class="card-title">HQ Dynamic Operations</div>
+      <div class="card-desc">Live org chart, agent hierarchy, and operational structure.</div>
+    </a>
+
+  </div>
+</div>
+
+</body>
+</html>

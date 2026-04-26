@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Org Chart | Alpha HQ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #050505;
+            color: #e2e8f0;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 4rem 2rem;
+        }
+
+        .org-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+            position: relative;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        /* Connecting Lines */
+        .line-v {
+            width: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            height: 2rem;
+        }
+
+        .line-h-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            position: relative;
+        }
+
+        .line-h {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            position: absolute;
+            top: 0;
+        }
+
+        /* Card Styles */
+        .card {
+            background: #111111;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1.5rem;
+            width: 420px;
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        .card:hover {
+            border-color: rgba(255, 255, 255, 0.15);
+            background: #151515;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+        }
+
+        .card.active {
+            border-color: rgba(52, 211, 153, 0.3);
+        }
+
+        .card-small {
+            width: 280px;
+            padding: 1.25rem;
+        }
+
+        .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            background: #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-right: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+        }
+
+        /* Status Indicator */
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #475569;
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            border: 2px solid #111;
+        }
+
+        .status-active .status-dot {
+            background: #10b981;
+            box-shadow: 0 0 10px #10b981;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .tag {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            color: #94a3b8;
+        }
+
+        .tag-blue { color: #60a5fa; border-color: rgba(96, 165, 250, 0.2); background: rgba(96, 165, 250, 0.05); }
+        .tag-orange { color: #fb923c; border-color: rgba(251, 146, 60, 0.2); background: rgba(251, 146, 60, 0.05); }
+        .tag-emerald { color: #34d399; border-color: rgba(52, 211, 153, 0.2); background: rgba(52, 211, 153, 0.05); }
+        .tag-purple { color: #a78bfa; border-color: rgba(167, 139, 250, 0.2); background: rgba(167, 139, 250, 0.05); }
+        .tag-amber { color: #fbbf24; border-color: rgba(251, 191, 36, 0.2); background: rgba(251, 191, 36, 0.05); }
+
+        .agent-description {
+            font-size: 0.75rem;
+            line-height: 1.25;
+            color: #94a3b8;
+            margin-bottom: 1rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .role-card-link {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #475569;
+            text-align: right;
+            margin-top: 0.5rem;
+            display: block;
+        }
+
+        .section-label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: #475569;
+            background: #050505;
+            padding: 0 1rem;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .row {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            position: relative;
+            flex-wrap: wrap;
+        }
+
+        .back-link {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            color: #475569;
+            text-decoration: none;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+            z-index: 50;
+        }
+        .back-link:hover { opacity: 1; }
+
+        /* Detail Panel */
+        #detail-panel {
+            position: fixed;
+            right: -400px;
+            top: 0;
+            width: 400px;
+            height: 100vh;
+            background: #0a0a0a;
+            border-left: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            transition: right 0.3s ease;
+            z-index: 100;
+            overflow-y: auto;
+        }
+
+        #detail-panel.open {
+            right: 0;
+        }
+
+        .detail-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+
+        .close-btn {
+            color: #475569;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .close-btn:hover { color: white; }
+
+        .metric-box {
+            background: #111;
+            border: 1px solid rgba(255,255,255,0.03);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .metric-label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            color: #475569;
+            margin-bottom: 0.25rem;
+        }
+
+        .metric-value {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        /* Refresh Indicator */
+        .refresh-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            height: 2px;
+            background: #3b82f6;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="/HQ/index.html" class="back-link">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        Back to Dashboard
+    </a>
+
+    <div class="org-container">
+        <h1 class="text-2xl font-bold mb-4 text-slate-400">HQ DYNAMIC OPERATIONS</h1>
+
+        <div class="flex gap-4 mb-8">
+        </div>
+
+        <!-- Level 1: Alpha & Guardian -->
+        <div class="row items-center">
+            <!-- Guardian -->
+            <div id="card-Guardian" class="card card-small border-amber-500/20 opacity-80 scale-95" onclick="showDetails('Guardian')">
+                <div class="flex items-start">
+                    <div class="avatar">
+                        🛡️
+                        <div class="status-dot"></div>
+                    </div>
+                    <div>
+                        <h2 class="text-md font-bold">Guardian</h2>
+                        <p class="text-amber-400 text-xs font-semibold mb-2">Governance (Flash)</p>
+                        <p class="agent-description">MaatSpec compliance monitoring, tier violation detection, and authorization verification. Always-on oversight for operational safety.</p>
+                        <div class="flex flex-wrap gap-1">
+                            <span class="tag tag-amber">COMPLIANCE</span>
+                            <span class="tag tag-amber">SECURITY</span>
+                            <span class="tag tag-amber">OVERSIGHT</span>
+                        </div>
+                        <div class="role-card-link">ROLE CARD →</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alpha -->
+            <div id="card-Alpha" class="card border-blue-500/20" onclick="showDetails('Alpha')">
+                <div class="flex items-start">
+                    <div class="avatar">
+                        🏛️
+                        <div class="status-dot"></div>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold">Alpha</h2>
+                        <p class="text-blue-400 text-xs font-semibold mb-2">Chief of Staff (Sonnet 4.5)</p>
+                        <p class="agent-description">Strategic coordination, decision-making, and principal interface. MaatSpec governance with proactive anticipation and cognitive load reduction.</p>
+                        <div class="flex gap-2">
+                            <span class="tag tag-blue">STRATEGY</span>
+                            <span class="tag tag-blue">GOVERNANCE</span>
+                            <span class="tag tag-blue">DELEGATION</span>
+                        </div>
+                        <div class="role-card-link">ROLE CARD →</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="line-v"></div>
+
+        <div class="line-h-container">
+            <div class="line-h" style="width: 66%;"></div>
+            <div class="section-label">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+                SPECIALIZED AGENTS
+            </div>
+        </div>
+
+        <!-- Level 2: JS, Super, Agent-D -->
+        <div class="row">
+            <!-- JS -->
+            <div id="card-JS" class="card card-small border-purple-500/10" onclick="showDetails('JS')">
+                <div class="flex items-start">
+                    <div class="avatar">
+                        💻
+                        <div class="status-dot"></div>
+                    </div>
+                    <div>
+                        <h2 class="text-md font-bold">JS</h2>
+                        <p class="text-purple-400 text-xs font-semibold mb-2">Coding (Opus 4.5)</p>
+                        <p class="agent-description">Script writing, debugging, feature implementation, and complex technical tasks.</p>
+                        <div class="flex flex-wrap gap-1">
+                            <span class="tag tag-purple">CODING</span>
+                            <span class="tag tag-purple">ARCHITECTURE</span>
+                            <span class="tag tag-purple">LOGIC</span>
+                        </div>
+                        <div class="role-card-link">ROLE CARD →</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Super -->
+            <div id="card-Super" class="card card-small border-orange-500/10" onclick="showDetails('Super')">
+                <div class="flex items-start">
+                    <div class="avatar">
+                        🏠
+                        <div class="status-dot"></div>
+                    </div>
+                    <div>
+                        <h2 class="text-md font-bold">Super</h2>
+                        <p class="text-orange-400 text-xs font-semibold mb-2">Property Ops (Flash)</p>
+                        <p class="agent-description">Tenant relations, maintenance coordination, lease management, and vendor follow-ups for property operations.</p>
+                        <div class="flex flex-wrap gap-1">
+                            <span class="tag tag-orange">PROPERTY</span>
+                            <span class="tag tag-orange">TENANTS</span>
+                            <span class="tag tag-orange">MAINTENANCE</span>
+                        </div>
+                        <div class="role-card-link">ROLE CARD →</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Agent-D -->
+            <div id="card-Agent-D" class="card card-small border-emerald-500/10" onclick="showDetails('Agent-D')">
+                <div class="flex items-start">
+                    <div class="avatar">
+                        📊
+                        <div class="status-dot"></div>
+                    </div>
+                    <div>
+                        <h2 class="text-md font-bold">Agent-D</h2>
+                        <p class="text-emerald-400 text-xs font-semibold mb-2">Finance Ops (Flash)</p>
+                        <p class="agent-description">Expense tracking, invoice management, payment processing, and budget monitoring for financial health.</p>
+                        <div class="flex flex-wrap gap-1">
+                            <span class="tag tag-emerald">FINANCE</span>
+                            <span class="tag tag-emerald">PAYMENTS</span>
+                            <span class="tag tag-emerald">REPORTING</span>
+                        </div>
+                        <div class="role-card-link">ROLE CARD →</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detail Panel -->
+    <div id="detail-panel">
+        <div class="detail-header">
+            <h2 id="panel-title" class="text-xl font-bold">Agent Details</h2>
+            <div class="close-btn" onclick="closeDetails()">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </div>
+        </div>
+
+        <div id="panel-content">
+            <div class="metric-box">
+                <div class="metric-label">Status</div>
+                <div id="panel-status" class="metric-value">Loading...</div>
+            </div>
+            <div class="metric-box">
+                <div class="metric-label">Model</div>
+                <div id="panel-model" class="metric-value">-</div>
+            </div>
+            <div class="metric-box">
+                <div class="metric-label">Total Token Usage</div>
+                <div id="panel-tokens" class="metric-value">-</div>
+            </div>
+            <div class="metric-box">
+                <div class="metric-label">Last Active</div>
+                <div id="panel-last" class="metric-value">-</div>
+            </div>
+            <div class="metric-box">
+                <div class="metric-label">Active Sessions</div>
+                <div id="panel-sessions" class="metric-value">-</div>
+            </div>
+            <div id="session-list" class="mt-4">
+                <!-- Session items will be injected here -->
+            </div>
+        </div>
+    </div>
+
+    <div class="refresh-bar" id="refresh-bar"></div>
+
+    <script>
+        let agentData = {};
+        const REFRESH_INTERVAL = 30000;
+        let lastRefresh = Date.now();
+
+        async function updateStatus() {
+            try {
+                const response = await fetch('/HQ/api/agents-status.js');
+                const data = await response.json();
+                agentData = data.agents;
+
+                Object.keys(agentData).forEach(name => {
+                    const agent = agentData[name];
+                    const card = document.getElementById(`card-${name}`);
+                    if (card) {
+                        if (agent.status === 'active') {
+                            card.classList.add('status-active');
+                        } else {
+                            card.classList.remove('status-active');
+                        }
+                    }
+                });
+
+                lastRefresh = Date.now();
+                updatePanelIfOpen();
+            } catch (err) {
+                console.error('Failed to fetch agent status:', err);
+            }
+        }
+
+        let selectedAgent = null;
+
+        function showDetails(name) {
+            selectedAgent = name;
+            const panel = document.getElementById('detail-panel');
+            panel.classList.add('open');
+            updatePanelIfOpen();
+        }
+
+        function closeDetails() {
+            const panel = document.getElementById('detail-panel');
+            panel.classList.remove('open');
+            selectedAgent = null;
+        }
+
+        function updatePanelIfOpen() {
+            if (!selectedAgent || !agentData[selectedAgent]) return;
+
+            const agent = agentData[selectedAgent];
+            document.getElementById('panel-title').innerText = agent.name;
+            document.getElementById('panel-status').innerText = agent.status.toUpperCase();
+            document.getElementById('panel-status').className = 'metric-value ' + (agent.status === 'active' ? 'text-emerald-400' : 'text-slate-500');
+            document.getElementById('panel-model').innerText = agent.model;
+            document.getElementById('panel-tokens').innerText = agent.totalTokens.toLocaleString();
+            document.getElementById('panel-last').innerText = agent.lastActive ? new Date(agent.lastActive).toLocaleString() : 'Never';
+            document.getElementById('panel-sessions').innerText = agent.sessions.length;
+
+            const sessionList = document.getElementById('session-list');
+            sessionList.innerHTML = '<div class="metric-label mb-2">Session History</div>';
+
+            agent.sessions.sort((a,b) => b.updatedAt - a.updatedAt).forEach(s => {
+                const div = document.createElement('div');
+                div.className = 'text-[10px] bg-white/5 p-2 rounded mb-1 border border-white/5';
+                div.innerHTML = `
+                    <div class="flex justify-between text-slate-400 mb-1">
+                        <span>${s.key.split(':').pop()}</span>
+                        <span>${new Date(s.updatedAt).toLocaleTimeString()}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">${s.model}</span>
+                        <span class="text-blue-400">${(s.totalTokens || 0).toLocaleString()} tkn</span>
+                    </div>
+                `;
+                sessionList.appendChild(div);
+            });
+        }
+
+        // Progress bar animation
+        function updateProgressBar() {
+            const now = Date.now();
+            const elapsed = now - lastRefresh;
+            const progress = Math.min(100, (elapsed / REFRESH_INTERVAL) * 100);
+            document.getElementById('refresh-bar').style.width = progress + '%';
+
+            if (elapsed >= REFRESH_INTERVAL) {
+                updateStatus();
+            }
+            requestAnimationFrame(updateProgressBar);
+        }
+
+        // Initial load
+        updateStatus();
+        updateProgressBar();
+    </script>
+</body>
+</html>

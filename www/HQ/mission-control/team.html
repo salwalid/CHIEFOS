@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mission Control — Team</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --bg-card: #12121a;
+    --bg-card-hover: #1a1a25;
+    --text: #e8e6e3;
+    --text-dim: #9ca3af;
+    --text-muted: #6b7280;
+    --gold: #c9a84c;
+    --gold-dim: rgba(201,168,76,0.15);
+    --green: #34d399;
+    --green-dim: rgba(52,211,153,0.15);
+    --blue: #60a5fa;
+    --blue-dim: rgba(96,165,250,0.15);
+    --purple: #a78bfa;
+    --purple-dim: rgba(167,139,250,0.15);
+    --red: #f87171;
+    --orange: #fb923c;
+    --border: rgba(255,255,255,0.06);
+    --border-gold: rgba(201,168,76,0.25);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+  .mono { font-family:'JetBrains Mono',monospace; font-size:0.8rem; }
+
+  /* NAV */
+  nav {
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    background:rgba(10,10,15,0.85); backdrop-filter:blur(20px);
+    border-bottom:1px solid var(--border); height:56px;
+    display:flex; align-items:center; justify-content:space-between; padding:0 2rem;
+  }
+  .nav-brand { display:flex; align-items:center; gap:0.6rem; text-decoration:none; }
+  .nav-brand span:first-child { font-size:1.2rem; }
+  .nav-brand span:last-child { font-size:0.95rem; font-weight:600; color:var(--text); letter-spacing:-0.02em; }
+  .nav-brand .gold { color:var(--gold); }
+  .nav-links { display:flex; gap:0.25rem; }
+  .nav-links a {
+    padding:0.45rem 1rem; border-radius:6px; font-size:0.82rem; font-weight:500;
+    text-decoration:none; color:var(--text-dim); transition:all 0.2s;
+  }
+  .nav-links a:hover { color:var(--text); background:rgba(255,255,255,0.04); }
+  .nav-links a.active { color:var(--gold); background:var(--gold-dim); }
+  .nav-meta { font-size:0.75rem; color:var(--text-muted); }
+  .nav-meta .mono { color:var(--text-dim); }
+
+  /* LAYOUT */
+  main { padding:80px 2rem 3rem; max-width:1200px; margin:0 auto; }
+  h1 { font-size:1.6rem; font-weight:700; letter-spacing:-0.03em; margin-bottom:0.3rem; }
+  .subtitle { color:var(--text-dim); font-size:0.9rem; margin-bottom:2rem; }
+
+  /* STATS BAR */
+  .stats { display:flex; gap:1.5rem; margin-bottom:2.5rem; flex-wrap:wrap; }
+  .stat {
+    background:var(--bg-card); border:1px solid var(--border); border-radius:10px;
+    padding:1rem 1.4rem; min-width:140px;
+  }
+  .stat-value { font-size:1.8rem; font-weight:700; letter-spacing:-0.04em; }
+  .stat-label { font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.08em; margin-top:0.15rem; }
+
+  /* ORG CHART */
+  .org-chart { display:flex; flex-direction:column; align-items:center; gap:1.5rem; }
+  .org-level { display:flex; gap:1rem; flex-wrap:wrap; justify-content:center; position:relative; }
+  .org-connector {
+    width:2px; height:24px; background:var(--border-gold); margin:0 auto;
+  }
+  .org-branch-line {
+    height:2px; background:var(--border-gold); position:relative;
+    margin:0 auto; display:flex; align-items:center; justify-content:center;
+  }
+
+  /* AGENT CARD */
+  .agent-card {
+    background:var(--bg-card); border:1px solid var(--border); border-radius:12px;
+    padding:1.25rem; width:280px; transition:all 0.25s; cursor:default;
+    position:relative; overflow:hidden;
+  }
+  .agent-card:hover { border-color:var(--border-gold); transform:translateY(-2px); box-shadow:0 8px 30px rgba(0,0,0,0.3); }
+  .agent-card.orchestrator { border-color:var(--border-gold); }
+  .agent-card.orchestrator::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:2px;
+    background:linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+  .agent-card.guardian { border-left:2px solid var(--green); }
+  .agent-card.specialist { border-left:2px solid var(--blue); }
+  .agent-card.on-demand { border-left:2px solid var(--purple); opacity:0.75; }
+  .agent-card.on-demand:hover { opacity:1; }
+
+  .agent-header { display:flex; align-items:center; gap:0.7rem; margin-bottom:0.8rem; }
+  .agent-emoji { font-size:1.5rem; width:38px; height:38px; display:flex; align-items:center; justify-content:center; border-radius:8px; background:rgba(255,255,255,0.04); }
+  .agent-name { font-size:1.05rem; font-weight:700; letter-spacing:-0.02em; }
+  .agent-role { font-size:0.75rem; color:var(--text-dim); }
+
+  .agent-model {
+    display:inline-flex; align-items:center; gap:0.35rem;
+    padding:0.2rem 0.55rem; border-radius:5px; font-size:0.7rem;
+    font-family:'JetBrains Mono',monospace; margin-bottom:0.7rem;
+    background:rgba(255,255,255,0.04); color:var(--text-dim); border:1px solid var(--border);
+  }
+  .model-dot { width:6px; height:6px; border-radius:50%; }
+  .model-dot.anthropic { background:#d4a574; }
+  .model-dot.google { background:#4285f4; }
+  .model-dot.openai { background:#10a37f; }
+
+  .agent-status {
+    position:absolute; top:1rem; right:1rem; display:flex; align-items:center; gap:0.35rem;
+    font-size:0.68rem; text-transform:uppercase; letter-spacing:0.06em; font-weight:600;
+  }
+  .status-dot { width:7px; height:7px; border-radius:50%; }
+  .status-dot.active { background:var(--green); box-shadow:0 0 8px rgba(52,211,153,0.5); animation:pulse 2s ease-in-out infinite; }
+  .status-dot.on-demand { background:var(--purple); }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  .agent-caps { margin-top:0.6rem; display:flex; flex-wrap:wrap; gap:0.3rem; }
+  .cap-tag {
+    font-size:0.65rem; padding:0.15rem 0.45rem; border-radius:4px;
+    background:rgba(255,255,255,0.04); color:var(--text-muted); border:1px solid var(--border);
+  }
+
+  .agent-details { margin-top:0.8rem; padding-top:0.7rem; border-top:1px solid var(--border); }
+  .agent-detail { display:flex; justify-content:space-between; font-size:0.75rem; padding:0.15rem 0; }
+  .agent-detail .label { color:var(--text-muted); }
+  .agent-detail .value { color:var(--text-dim); font-family:'JetBrains Mono',monospace; font-size:0.72rem; }
+
+  /* PRINCIPAL CARD */
+  .principal-card {
+    background:linear-gradient(135deg, var(--bg-card) 0%, #1a1520 100%);
+    border:1px solid var(--border-gold); border-radius:12px;
+    padding:1rem 1.8rem; display:flex; align-items:center; gap:1rem;
+    text-align:center; min-width:220px;
+  }
+  .principal-card .emoji { font-size:1.5rem; }
+  .principal-card .name { font-size:1rem; font-weight:700; }
+  .principal-card .role { font-size:0.72rem; color:var(--gold); text-transform:uppercase; letter-spacing:0.1em; }
+
+  /* SECTION LABELS */
+  .section-label {
+    font-size:0.68rem; text-transform:uppercase; letter-spacing:0.12em;
+    color:var(--text-muted); font-weight:600; text-align:center;
+    padding:0.4rem 1rem; background:var(--bg-card); border:1px solid var(--border);
+    border-radius:20px; display:inline-block; margin:0.5rem 0;
+  }
+
+  .loading { text-align:center; padding:4rem; color:var(--text-dim); }
+  .loading-spinner { display:inline-block; width:20px; height:20px; border:2px solid var(--border); border-top-color:var(--gold); border-radius:50%; animation:spin 0.8s linear infinite; margin-right:0.5rem; vertical-align:middle; }
+  @keyframes spin { to{transform:rotate(360deg)} }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="team.html">
+    <span>🎯</span>
+    <span>Mission <span class="gold">Control</span></span>
+  </a>
+  <div class="nav-links">
+    <a href="team.html" class="active">Team</a>
+    <a href="calendar.html">Calendar</a>
+    <a href="/HQ/office/">Office</a>
+  </div>
+  <div class="nav-meta">
+    <span class="mono" id="nav-time"></span>
+  </div>
+</nav>
+
+<main>
+  <h1>Team Structure</h1>
+  <p class="subtitle">Org chart — agents, models, and responsibilities</p>
+
+  <div class="stats" id="stats-bar"></div>
+  <div class="org-chart" id="org-chart">
+    <div class="loading"><span class="loading-spinner"></span>Loading agent data…</div>
+  </div>
+</main>
+
+<script>
+const DATA_URL = 'mission-control.json';
+
+// Clock
+function updateClock() {
+  const now = new Date();
+  const el = document.getElementById('nav-time');
+  if (el) el.textContent = now.toLocaleString('en-CA', { timeZone:'$TZ', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false }) + ' EST';
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+function getProviderFromModel(model) {
+  if (!model) return 'unknown';
+  if (model.startsWith('anthropic/')) return 'anthropic';
+  if (model.startsWith('google/')) return 'google';
+  if (model.startsWith('openai/')) return 'openai';
+  return 'unknown';
+}
+
+function shortModel(model) {
+  if (!model) return '—';
+  return model.split('/').pop().replace(/-preview$/, '');
+}
+
+function renderStats(data) {
+  const s = data.stats;
+  const bar = document.getElementById('stats-bar');
+  bar.innerHTML = `
+    <div class="stat"><div class="stat-value" style="color:var(--gold)">${s.total_agents}</div><div class="stat-label">Total Agents</div></div>
+    <div class="stat"><div class="stat-value" style="color:var(--green)">${s.active_agents}</div><div class="stat-label">Always On</div></div>
+    <div class="stat"><div class="stat-value" style="color:var(--purple)">${s.on_demand_agents}</div><div class="stat-label">On Demand</div></div>
+    <div class="stat"><div class="stat-value" style="color:var(--blue)">${s.active_schedules}</div><div class="stat-label">Active Jobs</div></div>
+  `;
+}
+
+function buildAgentCard(agent) {
+  const provider = getProviderFromModel(agent.model);
+  const tierClass = agent.tier === 'orchestrator' ? 'orchestrator' :
+                    agent.tier === 'guardian' ? 'guardian' :
+                    agent.status === 'on-demand' ? 'on-demand' : 'specialist';
+  const statusClass = agent.status === 'active' ? 'active' : 'on-demand';
+  const caps = (agent.capabilities || []).slice(0, 4);
+
+  return `
+    <div class="agent-card ${tierClass}">
+      <div class="agent-status">
+        <span class="status-dot ${statusClass}"></span>
+        <span style="color:${statusClass === 'active' ? 'var(--green)' : 'var(--purple)'}">${agent.status}</span>
+      </div>
+      <div class="agent-header">
+        <div class="agent-emoji">${agent.emoji || '🤖'}</div>
+        <div>
+          <div class="agent-name">${agent.name}</div>
+          <div class="agent-role">${agent.role}</div>
+        </div>
+      </div>
+      <div class="agent-model">
+        <span class="model-dot ${provider}"></span>
+        ${shortModel(agent.model)}
+      </div>
+      <div class="agent-caps">
+        ${caps.map(c => `<span class="cap-tag">${c}</span>`).join('')}
+        ${(agent.capabilities || []).length > 4 ? `<span class="cap-tag" style="color:var(--text-muted)">+${agent.capabilities.length - 4}</span>` : ''}
+      </div>
+      <div class="agent-details">
+        <div class="agent-detail"><span class="label">ID</span><span class="value">${agent.id}</span></div>
+        <div class="agent-detail"><span class="label">Reports to</span><span class="value">${agent.reports_to || '—'}</span></div>
+        ${agent.heartbeat ? `<div class="agent-detail"><span class="label">Heartbeat</span><span class="value">${agent.heartbeat}</span></div>` : ''}
+        ${agent.governance ? `<div class="agent-detail"><span class="label">Governance</span><span class="value" style="font-size:0.65rem">${agent.governance}</span></div>` : ''}
+      </div>
+    </div>
+  `;
+}
+
+function renderOrgChart(data) {
+  const chart = document.getElementById('org-chart');
+  const agents = data.agents;
+  const orchestrator = agents.find(a => a.tier === 'orchestrator');
+  const persistentSubs = agents.filter(a => a.reports_to === 'main' && a.status === 'active' && a.tier !== 'orchestrator');
+  const onDemandSubs = agents.filter(a => a.reports_to === 'main' && a.status === 'on-demand');
+
+  chart.innerHTML = `
+    <!-- PRINCIPAL -->
+    <div class="org-level">
+      <div class="principal-card">
+        <span class="emoji">👤</span>
+        <div>
+          <div class="name">${data.principal.name}</div>
+          <div class="role">Principal</div>
+        </div>
+      </div>
+    </div>
+    <div class="org-connector"></div>
+
+    <!-- ORCHESTRATOR -->
+    <div class="org-level">
+      ${orchestrator ? buildAgentCard(orchestrator) : ''}
+    </div>
+    <div class="org-connector"></div>
+
+    <!-- PERSISTENT AGENTS LABEL -->
+    <div class="section-label">Always-On Agents</div>
+    <div class="org-level">
+      ${persistentSubs.map(a => buildAgentCard(a)).join('')}
+    </div>
+
+    ${onDemandSubs.length ? `
+      <div class="org-connector"></div>
+      <div class="section-label">On-Demand Specialists</div>
+      <div class="org-level">
+        ${onDemandSubs.map(a => buildAgentCard(a)).join('')}
+      </div>
+    ` : ''}
+  `;
+}
+
+fetch(DATA_URL)
+  .then(r => r.json())
+  .then(data => {
+    renderStats(data);
+    renderOrgChart(data);
+  })
+  .catch(err => {
+    document.getElementById('org-chart').innerHTML =
+      `<div class="loading" style="color:var(--red)">Failed to load data. Run <code class="mono">./build.sh</code> first.</div>`;
+  });
+</script>
+</body>
+</html>

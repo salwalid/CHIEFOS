@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API Usage & Billing | Alpha HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Serif+Display&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0b0e15;
+  --surface: #12151e;
+  --panel: #181c28;
+  --border: #222840;
+  --border-hi: #2e3650;
+  --green: #34d399;
+  --green-dim: rgba(52,211,153,0.08);
+  --blue: #60a5fa;
+  --blue-dim: rgba(96,165,250,0.08);
+  --orange: #fb923c;
+  --orange-dim: rgba(251,146,60,0.08);
+  --gold: #e8c96d;
+  --gold-dim: rgba(232,201,109,0.08);
+  --text: #8492b4;
+  --text-mid: #a8b8d8;
+  --text-bright: #e4ecff;
+  --mono: 'DM Mono', monospace;
+  --serif: 'DM Serif Display', serif;
+  --sans: 'Outfit', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh;
+  background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(232,201,109,0.03) 0%, transparent 60%);
+}
+
+/* Header */
+.header {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(11,14,21,0.92); backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 24px; display: flex; align-items: center; gap: 16px;
+}
+.header-back { color: var(--gold); text-decoration: none; font-size: 20px; transition: opacity 0.2s; }
+.header-back:hover { opacity: 0.7; }
+.header-info { flex: 1; }
+.header-title { font-family: var(--serif); font-size: 18px; color: var(--text-bright); }
+.header-sub { font-family: var(--mono); font-size: 10px; color: var(--text); letter-spacing: 0.1em; margin-top: 1px; }
+.header-live {
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: 10px; color: var(--gold);
+  letter-spacing: 0.1em;
+}
+.pulse { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); animation: pulse 2s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+/* Content */
+.content { max-width: 900px; margin: 0 auto; padding: 32px 24px; }
+
+/* Provider Cards */
+.providers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 32px; }
+.provider {
+  background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+  padding: 24px; position: relative; overflow: hidden;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.provider:hover { border-color: var(--border-hi); transform: translateY(-2px); }
+.provider::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+}
+.provider-anthropic::before { background: var(--blue); }
+.provider-google::before { background: var(--green); }
+.provider-openai::before { background: var(--orange); }
+
+.provider-icon {
+  font-size: 28px; margin-bottom: 14px;
+}
+.provider-name {
+  font-family: var(--serif); font-size: 20px; color: var(--text-bright);
+  margin-bottom: 2px;
+}
+.provider-model {
+  font-family: var(--mono); font-size: 10px; color: var(--text);
+  letter-spacing: 0.08em; margin-bottom: 16px;
+}
+
+.provider-links { display: flex; flex-direction: column; gap: 6px; }
+.plink {
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--mono); font-size: 11px; color: var(--text-mid);
+  text-decoration: none; padding: 8px 12px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 6px; transition: all 0.15s;
+}
+.plink:hover { border-color: var(--border-hi); color: var(--text-bright); background: var(--panel); }
+.plink-icon { font-size: 14px; flex-shrink: 0; }
+.plink-label { flex: 1; }
+.plink-arrow { color: var(--text); font-size: 10px; opacity: 0.5; }
+
+.plink-billing { border-color: rgba(232,201,109,0.15); }
+.plink-billing:hover { border-color: rgba(232,201,109,0.3); color: var(--gold); }
+
+/* Pricing Reference */
+.pricing-section { margin-top: 8px; }
+.pricing-title {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em;
+  color: var(--text); margin-bottom: 14px; padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.price-card {
+  background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+  padding: 16px; transition: border-color 0.15s;
+}
+.price-card:hover { border-color: var(--border-hi); }
+.price-provider {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em;
+  margin-bottom: 10px;
+}
+.price-anthropic { color: var(--blue); }
+.price-google { color: var(--green); }
+.price-openai { color: var(--orange); }
+.price-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 4px 0; font-size: 11px;
+}
+.price-row:not(:last-child) { border-bottom: 1px solid var(--border); }
+.price-label { color: var(--text); }
+.price-value { font-family: var(--mono); font-size: 11px; color: var(--text-mid); }
+
+/* TKP Cost Estimate */
+.estimate {
+  background: var(--gold-dim); border: 1px solid rgba(232,201,109,0.15);
+  border-radius: 10px; padding: 18px 22px; margin-top: 24px;
+  display: flex; align-items: center; gap: 16px;
+}
+.estimate-icon { font-size: 24px; }
+.estimate-text { flex: 1; }
+.estimate-title {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em;
+  color: var(--gold); margin-bottom: 4px;
+}
+.estimate-body { font-size: 12px; color: var(--text-mid); line-height: 1.6; }
+.estimate-body strong { color: var(--gold); }
+
+/* Footer */
+.footer {
+  text-align: center; padding: 24px;
+  font-family: var(--mono); font-size: 9px; color: var(--text);
+  letter-spacing: 0.1em; opacity: 0.5;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 2px; }
+
+/* Animations */
+.provider, .price-card, .estimate {
+  opacity: 0; transform: translateY(12px);
+  animation: fadeUp 0.4s ease forwards;
+}
+.provider:nth-child(1) { animation-delay: 0.05s; }
+.provider:nth-child(2) { animation-delay: 0.1s; }
+.provider:nth-child(3) { animation-delay: 0.15s; }
+.price-card:nth-child(1) { animation-delay: 0.2s; }
+.price-card:nth-child(2) { animation-delay: 0.25s; }
+.price-card:nth-child(3) { animation-delay: 0.3s; }
+.estimate { animation-delay: 0.35s; }
+@keyframes fadeUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .providers, .pricing-grid { grid-template-columns: 1fr; }
+  .content { padding: 20px 14px; }
+  .header { padding: 12px 14px; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a href="/HQ/" class="header-back">←</a>
+  <div class="header-info">
+    <div class="header-title">API Usage & Billing</div>
+    <div class="header-sub">CHIEFOS HQ · PROVIDER DASHBOARDS</div>
+  </div>
+  <div class="header-live">
+    <div class="pulse"></div>
+    EXTERNAL LINKS
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- Provider Cards -->
+  <div class="providers">
+
+    <!-- Anthropic -->
+    <div class="provider provider-anthropic">
+      <div class="provider-icon">✦</div>
+      <div class="provider-name">Anthropic</div>
+      <div class="provider-model">CLAUDE SONNET · ANTHO ENGINE</div>
+      <div class="provider-links">
+        <a href="https://console.anthropic.com/settings/billing" target="_blank" class="plink plink-billing">
+          <span class="plink-icon">💳</span>
+          <span class="plink-label">Billing & Balance</span>
+          <span class="plink-arrow">↗</span>
+        </a>
+        <a href="https://console.anthropic.com/settings/usage" target="_blank" class="plink">
+          <span class="plink-icon">📊</span>
+          <span class="plink-label">Usage Dashboard</span>
+          <span class="plink-arrow">↗</span>
+        </a>
+        <a href="https://console.anthropic.com/settings/keys" target="_blank" class="plink">
+          <span class="plink-icon">🔑</span>
+          <span class="plink-label">API Keys</span>
+          <span class="plink-arrow">↗</span>
+        </a>
+        <a href="https://docs.anthropic.com/en/docs/about-claude/models" target="_blank" class="plink">
+          <span class="plink-icon">📖</span>
+          <span class="plink-label">Models & Pricing</span>
+          <span class="plink-arrow">↗</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Google -->
+    <div class="provider provider-google">
+      <div class="provider-icon">♊</div>
+      <div class="provider-name">Google</div>
+      <div class="provider-model">GEMINI 2.0 FLASH · GEMI ENGINE</div>
+      <div class="provider-links">
+        <a href="https://aistudio.google.com/apikey" target="_blank" class="plink plink-billing">
+          <span class="plink-icon">💳</span>
+          <span class="plink-label">API Keys & Billing</span>
+          <span class="plink-arrow">↗</span>
+        </a>
+        <a href="https://console.cloud.google.com/billing" target="_blank" class="plink">
+          <span class="plink-icon">📊</span>
+          <span class="plink-label">Cloud Billing Console</span>
+          <span class="plink-arrow">↗</span>
+        </a>
+        <a href="https://ai.google.dev/gemini-api/docs/rate-limits" target="_blank" class="plink">
+          <span class="plink-icon">⚡</span>
+          <span class="plink-label">Rate Limits & Quotas</span>
+          <span class="plink-arrow">↗</span>
+        </a>
+        <a href="https://ai.google.dev/pricing" target="_blank" class="plink">
+          <span class="plink-icon">📖</span>
+          <span class="plink-label">Models & Pricing</span>
+          <span class="plink-arrow">↗</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- OpenAI -->
+    <div class="provider provider-openai">
+      <div class="provider-icon">💬</div>
+      <div class="provider-name">OpenAI</div>
+      <div class="provider-model">GPT-4O · CHATTY ENGINE</div>
+      <div class="provider-links">
+        <a href="https://platform.openai.com/settings/organization/billing/overview" target="_blank" class="plink plink-billing">
+          <span class="plink-icon">💳</span>
+          <span class="plink-label">Billing & Balance</span>
+          <span class="plink-arrow">↗</span>
+        </a>
+        <a href="https://platform.openai.com/usage" target="_blank" class="plink">
+          <span class="plink-icon">📊</span>
+          <span class="plink-label">Usage Dashboard</span>
+          <span class="plink-arrow">↗</span>
+        </a>
+        <a href="https://platform.openai.com/api-keys" target="_blank" class="plink">
+          <span class="plink-icon">🔑</span>
+          <span class="plink-label">API Keys</span>
+          <span class="plink-arrow">↗</span>
+        </a>
+        <a href="https://platform.openai.com/docs/models" target="_blank" class="plink">
+          <span class="plink-icon">📖</span>
+          <span class="plink-label">Models & Pricing</span>
+          <span class="plink-arrow">↗</span>
+        </a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Pricing Reference -->
+  <div class="pricing-section">
+    <div class="pricing-title">CURRENT PRICING REFERENCE · PER 1M TOKENS</div>
+    <div class="pricing-grid">
+
+      <div class="price-card">
+        <div class="price-provider price-anthropic">✦ ANTHROPIC — CLAUDE SONNET</div>
+        <div class="price-row"><span class="price-label">Input</span><span class="price-value">$3.00</span></div>
+        <div class="price-row"><span class="price-label">Output</span><span class="price-value">$15.00</span></div>
+        <div class="price-row"><span class="price-label">~Cost per briefing</span><span class="price-value">~$0.07</span></div>
+      </div>
+
+      <div class="price-card">
+        <div class="price-provider price-google">♊ GOOGLE — GEMINI 2.0 FLASH</div>
+        <div class="price-row"><span class="price-label">Input</span><span class="price-value">$0.10</span></div>
+        <div class="price-row"><span class="price-label">Output</span><span class="price-value">$0.40</span></div>
+        <div class="price-row"><span class="price-label">~Cost per briefing</span><span class="price-value">~$0.002</span></div>
+      </div>
+
+      <div class="price-card">
+        <div class="price-provider price-openai">💬 OPENAI — GPT-4O</div>
+        <div class="price-row"><span class="price-label">Input</span><span class="price-value">$2.50</span></div>
+        <div class="price-row"><span class="price-label">Output</span><span class="price-value">$10.00</span></div>
+        <div class="price-row"><span class="price-label">~Cost per briefing</span><span class="price-value">~$0.05</span></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Daily Estimate -->
+  <div class="estimate">
+    <div class="estimate-icon">⚡</div>
+    <div class="estimate-text">
+      <div class="estimate-title">TRIPLE KNOWLEDGE DAILY COST ESTIMATE</div>
+      <div class="estimate-body">
+        Running all 3 engines once per day: <strong>~$0.12/day</strong> · <strong>~$0.84/week</strong> · <strong>~$3.60/month</strong><br>
+        Gemini is nearly free. Anthropic is the most expensive per call. OpenAI is in between.
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">CHIEFOS HQ · TRIPLE KNOWLEDGE PROTOCOL · API BILLING</div>
+
+</body>
+</html>

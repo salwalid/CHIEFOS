@@ -1,0 +1,23 @@
+# Interactive Twilio Call Requirements
+
+# Core Twilio
+twilio>=8.0.0
+
+# WebSocket server
+websockets>=12.0
+
+# AI/ML APIs
+openai>=1.0.0              # For Whisper STT and optional GPT
+anthropic>=0.20.0          # For Claude LLM
+elevenlabs>=0.2.0          # For high-quality TTS
+
+# AWS (for Polly TTS fallback)
+boto3>=1.28.0
+
+# Audio processing
+pydub>=0.25.0              # Audio format conversion
+numpy>=1.24.0              # Numerical operations
+
+# Optional: For more advanced audio processing
+# webrtcvad>=2.0.10        # Voice Activity Detection
+# scipy>=1.11.0            # Advanced signal processing

@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChiefOS HQ - Office Dashboard</title>
+    <style>
+        :root {
+            --pixel-size: 4px;
+            --bg-color: #1a1c2c;
+            --floor-color-1: #29366f;
+            --floor-color-2: #337357;
+            --wall-color: #3d3d52;
+            --sidebar-width: 300px;
+            --desk-color: #4a3728; /* Dark Oak Base */
+            --chair-color: #3d2b1f;
+            --wood-grain: #5d4637;
+            --leaf-green: #2d5a27;
+            --leaf-dark: #1b3d18;
+            
+            /* Skin Tones */
+            --skin-pale: #ffdbac;
+            --skin-medium: #e0ac69;
+            
+            /* Hair Colors */
+            --hair-dark: #222;
+            --hair-blonde: #f1c40f;
+            --hair-brown: #5d4037;
+            
+            /* Clothing */
+            --alpha-suit: #2c3e50;
+            --js-hoodie: #333;
+            --angel-gown: #ecf0f1;
+            --super-suit: #e74c3c;
+            --agent-d-robe: #27ae60;
+
+            /* Living HQ Colors */
+            --time-filter: rgba(0,0,0,0);
+            --window-bg: #87ceeb;
+            --steam-color: rgba(255,255,255,0.3);
+        }
+
+        /* Time Cycle Overlays */
+        #workspace::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--time-filter);
+            pointer-events: none;
+            z-index: 100;
+            transition: background 2s ease-in-out;
+        }
+
+        /* Window & Weather */
+        .window {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 120px;
+            background: var(--window-bg);
+            border-bottom: 8px solid #2c3e50;
+            box-shadow: inset 0 -20px 40px rgba(0,0,0,0.3);
+            z-index: 1;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* CN Tower */
+        .cn-tower {
+            position: absolute;
+            bottom: 0;
+            right: 20%;
+            width: 40px;
+            height: 100px;
+            z-index: 2;
+        }
+        .tower-shaft {
+            position: absolute;
+            bottom: 0;
+            left: 16px;
+            width: 8px;
+            height: 100%;
+            background: #95a5a6;
+            box-shadow: inset -2px 0 0 #7f8c8d;
+        }
+        .tower-pod {
+            position: absolute;
+            bottom: 60px;
+            left: 8px;
+            width: 24px;
+            height: 12px;
+            background: #bdc3c7;
+            border-radius: 4px;
+            box-shadow: 0 2px 0 #7f8c8d;
+        }
+        .tower-antenna {
+            position: absolute;
+            bottom: 72px;
+            left: 19px;
+            width: 2px;
+            height: 20px;
+            background: #7f8c8d;
+        }
+        .tower-led {
+            position: absolute;
+            top: 0;
+            left: -1px;
+            width: 4px;
+            height: 4px;
+            background: #ff0000;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #ff0000;
+            animation: pulse-red 2s infinite;
+        }
+        @keyframes pulse-red {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+
+        .weather-particle {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        @keyframes rain {
+            to { transform: translateY(80px); }
+        }
+
+        @keyframes snow {
+            0% { transform: translateY(-10px) translateX(0); }
+            50% { transform: translateY(40px) translateX(10px); }
+            100% { transform: translateY(80px) translateX(0); }
+        }
+
+        /* Office Decor */
+        .decor { position: absolute; z-index: 6; }
+        
+        /* Memory Plant */
+        .plant {
+            width: 30px;
+            height: 40px;
+            bottom: 75%;
+            left: 10%;
+        }
+        .plant-pot { width: 20px; height: 15px; background: #8d6e63; margin: 25px auto 0; border-radius: 0 0 4px 4px; }
+        .plant-leaves { 
+            position: absolute; top: 0; left: 5px; width: 20px; height: 30px; 
+            background: #2e7d32; border-radius: 50% 50% 0 0;
+            box-shadow: -5px 5px 0 #1b5e20, 5px 5px 0 #1b5e20;
+            animation: idle-breathe 4s ease-in-out infinite;
+        }
+
+        /* Coffee Machine */
+        .coffee-machine {
+            width: 40px;
+            height: 50px;
+            bottom: 70%;
+            right: 15%;
+            background: #333;
+            border-radius: 4px;
+        }
+        .coffee-pot {
+            position: absolute; bottom: 5px; left: 10px; width: 20px; height: 20px;
+            background: rgba(255,255,255,0.2); border: 2px solid #666; border-radius: 2px;
+        }
+        .steam {
+            position: absolute; bottom: 30px; left: 15px; width: 10px; height: 10px;
+            background: var(--steam-color); border-radius: 50%; filter: blur(4px);
+            animation: steam-rise 2s infinite; opacity: 0;
+        }
+        @keyframes steam-rise {
+            0% { transform: translateY(0) scale(1); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(-20px) scale(2); opacity: 0; }
+        }
+
+        /* Server Rack */
+        .server-rack {
+            width: 50px;
+            height: 80px;
+            bottom: 20%;
+            right: 5%;
+            background: #111;
+            border: 2px solid #333;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 5px;
+        }
+        .server-unit { height: 8px; background: #222; display: flex; align-items: center; padding: 0 4px; }
+        .led { width: 4px; height: 4px; border-radius: 50%; background: #0f0; margin-left: auto; }
+        .led.blink { animation: blink 0.5s step-end infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* Chaos Cat */
+        .cat {
+            position: absolute;
+            width: 24px;
+            height: 16px;
+            background: #ffa726;
+            border-radius: 8px 8px 4px 4px;
+            transition: all 2s ease-in-out;
+            z-index: 11;
+        }
+        .cat::before { content: '耳'; position: absolute; top: -8px; left: 2px; font-size: 8px; color: #ffa726; }
+        .cat::after { content: ''; position: absolute; right: -6px; top: 8px; width: 10px; height: 4px; background: #ffa726; border-radius: 2px; }
+
+        /* Semantic Thought Bubbles */
+        .status-bubble {
+            position: absolute;
+            top: -60px;
+            background: #fff;
+            color: #000;
+            padding: 8px;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 4px 4px 0 rgba(0,0,0,0.3);
+            border: 2px solid #000;
+            z-index: 20;
+            display: none;
+        }
+        .status-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 10px;
+            width: 10px;
+            height: 10px;
+            background: #fff;
+            border-right: 2px solid #000;
+            border-bottom: 2px solid #000;
+            transform: rotate(45deg);
+        }
+
+        .agent.active .status-bubble { display: flex; }
+
+        /* Character Sprite Styling */
+        .pixel-head { border-bottom: 2px solid rgba(0,0,0,0.1); border-radius: 4px 4px 2px 2px; }
+        .pixel-body { border-top: 1px solid rgba(255,255,255,0.1); border-radius: 4px 4px 0 0; }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Courier New', Courier, monospace;
+            background: var(--bg-color);
+            color: #ecf0f1;
+            overflow: hidden;
+            image-rendering: pixelated;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+            flex-direction: column;
+        }
+
+        .main-layout {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Isometric Workspace */
+        #workspace {
+            flex: 1;
+            position: relative;
+            background: #1a1c2c;
+            border-right: 2px solid #000;
+            overflow: hidden;
+            perspective: 1000px;
+        }
+
+        .isometric-floor {
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            top: -50%;
+            left: -50%;
+            background-color: var(--floor-color-1);
+            background-image: 
+                linear-gradient(30deg, #24305e 12%, transparent 12.5%, transparent 87%, #24305e 87.5%, #24305e),
+                linear-gradient(150deg, #24305e 12%, transparent 12.5%, transparent 87%, #24305e 87.5%, #24305e),
+                linear-gradient(30deg, #24305e 12%, transparent 12.5%, transparent 87%, #24305e 87.5%, #24305e),
+                linear-gradient(150deg, #24305e 12%, transparent 12.5%, transparent 87%, #24305e 87.5%, #24305e),
+                linear-gradient(60deg, #2f3f7a 25%, transparent 25.5%, transparent 75%, #2f3f7a 75%, #2f3f7a),
+                linear-gradient(60deg, #2f3f7a 25%, transparent 25.5%, transparent 75%, #2f3f7a 75%, #2f3f7a);
+            background-size: 80px 140px;
+            background-position: 0 0, 0 0, 40px 70px, 40px 70px, 0 0, 40px 70px;
+            transform: rotateX(60deg) rotateZ(45deg);
+            box-shadow: inset 0 0 100px rgba(0,0,0,0.5);
+        }
+
+        /* Workstation/Furniture */
+        .workstation {
+            position: absolute;
+            width: 120px;
+            height: 80px;
+            z-index: 5;
+        }
+
+        .desk {
+            position: absolute;
+            width: 100px;
+            height: 50px;
+            background: var(--desk-color);
+            background-image: 
+                repeating-linear-gradient(0deg, transparent, transparent 4px, var(--wood-grain) 4px, var(--wood-grain) 5px);
+            border-bottom: 4px solid #2d1f15;
+            border-right: 4px solid #2d1f15;
+            box-shadow: 10px 10px 0 rgba(0,0,0,0.2);
+        }
+
+        .chair {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: var(--chair-color);
+            background-image: 
+                linear-gradient(45deg, var(--wood-grain) 25%, transparent 25%);
+            background-size: 4px 4px;
+            bottom: -10px;
+            left: 35px;
+            border-radius: 4px;
+            border: 2px solid #2d1f15;
+        }
+
+        /* Filing Cabinet */
+        .cabinet {
+            position: absolute;
+            width: 40px;
+            height: 60px;
+            background: #2c3e50;
+            border: 2px solid #1a252f;
+            z-index: 4;
+            display: flex;
+            flex-direction: column;
+            padding: 4px;
+            gap: 4px;
+        }
+        .drawer {
+            height: 12px;
+            background: #34495e;
+            border: 1px solid #1a252f;
+            position: relative;
+        }
+        .drawer::after {
+            content: '';
+            position: absolute;
+            top: 4px;
+            left: 50%;
+            width: 8px;
+            height: 2px;
+            background: #95a5a6;
+            transform: translateX(-50%);
+        }
+
+        /* Bookshelf */
+        .bookshelf {
+            position: absolute;
+            width: 60px;
+            height: 80px;
+            background: var(--desk-color);
+            border: 2px solid #2d1f15;
+            z-index: 4;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            padding: 4px;
+        }
+        .shelf {
+            height: 2px;
+            background: #2d1f15;
+            width: 100%;
+        }
+        .books {
+            height: 15px;
+            display: flex;
+            gap: 1px;
+            align-items: flex-end;
+        }
+        .book { width: 4px; height: 12px; background: #c0392b; }
+        .book:nth-child(2n) { background: #2980b9; height: 14px; }
+        .book:nth-child(3n) { background: #f1c40f; height: 10px; }
+
+        /* your city Gallery */
+        .gallery-frame {
+            position: absolute;
+            width: 32px;
+            height: 32px;
+            background: #333;
+            border: 4px solid #5d4637;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        /* Rug */
+        .rug {
+            position: absolute;
+            width: 300px;
+            height: 200px;
+            background: #7f1d1d;
+            background-image: 
+                repeating-linear-gradient(45deg, #991b1b 0, #991b1b 10px, #7f1d1d 10px, #7f1d1d 20px);
+            top: 40%;
+            left: 50%;
+            transform: translateX(-50%) rotateX(60deg) rotateZ(45deg);
+            z-index: 3;
+            border: 4px solid #450a0a;
+        }
+
+        /* Clutter */
+        .paper {
+            position: absolute;
+            width: 12px;
+            height: 16px;
+            background: #fff;
+            box-shadow: 1px 1px 0 rgba(0,0,0,0.1);
+            transform: rotate(15deg);
+        }
+        .mug {
+            position: absolute;
+            width: 8px;
+            height: 10px;
+            background: #2980b9;
+            border-radius: 1px;
+        }
+        .mug::after {
+            content: '';
+            position: absolute;
+            right: -3px;
+            top: 2px;
+            width: 4px;
+            height: 4px;
+            border: 1px solid #2980b9;
+            border-radius: 50%;
+        }
+
+        /* Agent Sprites - NEW CSS PIXEL ART */
+        .agent {
+            position: absolute;
+            width: 64px;
+            height: 96px;
+            transition: all 0.5s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .sprite-container {
+            position: relative;
+            width: 40px;
+            height: 60px;
+            transition: transform 0.3s ease;
+        }
+
+        /* Base Body Parts */
+        .pixel-body { position: absolute; width: 24px; height: 32px; bottom: 0; left: 8px; }
+        .pixel-head { position: absolute; width: 20px; height: 20px; top: 8px; left: 10px; z-index: 2; }
+        
+        /* Agent-Specific Sprite Decorations */
+        .alpha .pixel-head { background: var(--skin-pale); box-shadow: 2px 2px 0 var(--hair-dark); }
+        .alpha .pixel-head::after { content: ''; position: absolute; width: 6px; height: 6px; border: 1px solid #000; border-radius: 50%; top: 5px; right: 2px; box-sizing: border-box; } /* Monocle */
+        .alpha .pixel-body { background: var(--alpha-suit); }
+
+        .js .pixel-head { background: var(--skin-medium); }
+        .js .pixel-head::before { content: ''; position: absolute; width: 100%; height: 12px; background: var(--js-hoodie); top: -4px; left: 0; border-radius: 10px 10px 0 0; } /* Hoodie */
+        .js .pixel-head::after { content: ''; position: absolute; width: 4px; height: 8px; background: #555; left: -2px; top: 6px; box-shadow: 20px 0 0 #555; } /* Headphones */
+        .js .pixel-body { background: var(--js-hoodie); }
+
+        .angel .pixel-head { background: var(--skin-pale); }
+        .angel .pixel-head::before { content: ''; position: absolute; width: 16px; height: 4px; border: 2px solid gold; border-radius: 50%; top: -10px; left: 2px; } /* Halo */
+        .angel .pixel-body { background: var(--angel-gown); box-shadow: -10px 0 0 rgba(255,255,255,0.3), 10px 0 0 rgba(255,255,255,0.3); } /* Wings effect */
+
+        .super .pixel-head { background: var(--skin-medium); }
+        .super .pixel-head::before { content: ''; position: absolute; width: 100%; height: 6px; background: #c0392b; top: -4px; border-radius: 4px 4px 0 0; } /* Cap */
+        .super .pixel-body { background: var(--super-suit); }
+        .super .pixel-body::after { content: ''; position: absolute; width: 100%; height: 4px; background: gold; top: 14px; } /* Belt */
+
+        .agent-d .pixel-head { background: var(--skin-pale); }
+        .agent-d .pixel-head::after { content: ''; position: absolute; width: 16px; height: 2px; background: #000; top: 8px; left: 2px; box-shadow: 0 4px 0 #000; } /* Glasses */
+        .agent-d .pixel-body { background: var(--agent-d-robe); }
+
+        /* Sleeping State */
+        .agent.sleeping .sprite-container {
+            transform: translateY(10px) rotate(5deg);
+        }
+        .agent.sleeping .pixel-head {
+            transform: translateY(4px);
+        }
+
+        .zzz {
+            position: absolute;
+            top: -20px;
+            right: -10px;
+            font-weight: bold;
+            color: #fff;
+            font-size: 14px;
+            opacity: 0;
+            pointer-events: none;
+            display: none;
+        }
+
+        .agent.sleeping .zzz {
+            display: block;
+            animation: zzz-float 3s infinite;
+        }
+
+        @keyframes zzz-float {
+            0% { transform: translate(0, 0); opacity: 0; }
+            20% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { transform: translate(10px, -20px); opacity: 0; }
+        }
+
+        /* Animations */
+        @keyframes idle-breathe {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-2px); }
+        }
+
+        @keyframes working-focus {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-1px) rotate(-1deg); }
+            50% { transform: translateY(0) scale(1.02); }
+            75% { transform: translateY(-1px) rotate(1deg); }
+        }
+
+        @keyframes monitor-glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(0, 255, 150, 0.2); }
+            50% { box-shadow: 0 0 15px rgba(0, 255, 150, 0.5); }
+        }
+
+        .idle { animation: idle-breathe 3s ease-in-out infinite; }
+        .working { 
+            animation: working-focus 1.8s ease-in-out infinite;
+        }
+        .working .pixel-head {
+            animation: monitor-glow 1.8s ease-in-out infinite;
+        }
+
+        .agent-label {
+            font-size: 10px;
+            background: rgba(0,0,0,0.8);
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-top: 4px;
+            border: 1px solid #555;
+            white-space: nowrap;
+        }
+
+        .status-bubble {
+            position: absolute;
+            top: -50px;
+            background: #fff;
+            color: #000;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            max-width: 140px;
+            box-shadow: 4px 4px 0 rgba(0,0,0,0.3);
+            border: 2px solid #000;
+            z-index: 20;
+            display: none;
+        }
+        .agent.active .status-bubble { display: block; }
+
+        /* Sidebar & Status Grid */
+        #activity-feed {
+            width: var(--sidebar-width);
+            background: #141622;
+            padding: 20px;
+            overflow-y: auto;
+            border-left: 4px solid #000;
+        }
+
+        #activity-feed h2 { font-size: 1rem; color: #5dade2; text-transform: uppercase; letter-spacing: 2px; border-bottom: 2px solid #2874a6; padding-bottom: 10px; }
+        .feed-item { font-size: 11px; margin-bottom: 12px; padding: 10px; background: #1c1f32; border-left: 4px solid #2874a6; }
+
+        #status-grid {
+            height: 140px;
+            background: #0f111a;
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+            border-top: 4px solid #000;
+        }
+
+        .agent-card {
+            flex: 1;
+            background: #1a1c2c;
+            border: 2px solid #333;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .agent-card.active-card { border-color: #2ecc71; }
+        .agent-card h3 { margin: 0; font-size: 12px; color: #5dade2; }
+        .agent-card p { margin: 2px 0; font-size: 10px; color: #888; }
+        .activity-text { color: #ccc; font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="main-layout">
+            <div id="workspace">
+                <div class="isometric-floor"></div>
+                <div class="rug"></div>
+
+                <!-- your city Gallery -->
+                <div class="gallery-frame" style="left: 10%; top: 15%;">🚃</div>
+                <div class="gallery-frame" style="left: 20%; top: 12%;">🍁</div>
+                <div class="gallery-frame" style="left: 30%; top: 15%;">🏙️</div>
+                <div class="gallery-frame" style="right: 10%; top: 15%;">🏀</div>
+
+                <!-- Workstations -->
+                <div class="workstation" style="left: 15%; top: 25%; z-index: 20;">
+                    <div class="desk">
+                        <div class="paper" style="top: 10px; left: 10px;"></div>
+                        <div class="mug" style="top: 5px; right: 15px;"></div>
+                    </div>
+                    <div class="chair"></div>
+                </div>
+                <div class="workstation" style="left: 45%; top: 20%; z-index: 18;">
+                    <div class="desk">
+                        <div class="mug" style="top: 20px; left: 20px; background: #c0392b;"></div>
+                    </div>
+                    <div class="chair"></div>
+                </div>
+                <div class="workstation" style="left: 75%; top: 25%; z-index: 20;">
+                    <div class="desk">
+                        <div class="paper" style="top: 5px; right: 20px; transform: rotate(-10deg);"></div>
+                    </div>
+                    <div class="chair"></div>
+                </div>
+                <div class="workstation" style="left: 25%; top: 65%; z-index: 40;">
+                    <div class="desk">
+                        <div class="paper" style="bottom: 10px; right: 10px;"></div>
+                    </div>
+                    <div class="chair"></div>
+                </div>
+                <div class="workstation" style="left: 65%; top: 65%; z-index: 40;">
+                    <div class="desk">
+                        <div class="mug" style="bottom: 15px; left: 10px; background: #f1c40f;"></div>
+                    </div>
+                    <div class="chair"></div>
+                </div>
+
+                <!-- Office Decor -->
+                <div class="window">
+                    <div id="weather-box"></div>
+                    <div class="cn-tower">
+                        <div class="tower-shaft"></div>
+                        <div class="tower-pod"></div>
+                        <div class="tower-antenna">
+                            <div class="tower-led"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cabinet" style="left: 5%; top: 40%;">
+                    <div class="drawer"></div><div class="drawer"></div><div class="drawer"></div><div class="drawer"></div>
+                </div>
+
+                <div class="bookshelf" style="right: 5%; top: 40%;">
+                    <div class="books"><div class="book"></div><div class="book"></div><div class="book"></div></div>
+                    <div class="shelf"></div>
+                    <div class="books"><div class="book"></div><div class="book"></div></div>
+                    <div class="shelf"></div>
+                </div>
+
+                <div class="decor plant" style="left: 48%; top: 50%; z-index: 30;">
+                    <div class="plant-leaves" style="background: #276749;"></div>
+                    <div class="plant-pot"></div>
+                </div>
+
+                <div class="decor plant" style="right: 20%; top: 75%; z-index: 50;">
+                    <div class="plant-leaves" style="width: 10px; height: 40px; border-radius: 50% 50% 0 0; background: #1b4332;"></div>
+                    <div class="plant-pot"></div>
+                </div>
+
+                <div class="decor coffee-machine" style="right: 35%; top: 40%; z-index: 10;">
+                    <div class="steam" style="animation-delay: 0s"></div>
+                    <div class="steam" style="animation-delay: 0.7s"></div>
+                    <div class="coffee-pot"></div>
+                </div>
+
+                <div class="decor server-rack">
+                    <div class="server-unit"><div class="led blink" style="background: #0f0"></div></div>
+                    <div class="server-unit"><div class="led blink" style="background: #f00; animation-delay: 0.2s"></div></div>
+                    <div class="server-unit"><div class="led blink" style="background: #0f0; animation-delay: 0.4s"></div></div>
+                    <div class="server-unit"><div class="led" style="background: #3498db"></div></div>
+                </div>
+
+                <div id="chaos-cat" class="cat"></div>
+
+                <div id="agents-layer"></div>
+            </div>
+
+            <div id="activity-feed">
+                <h2>System Log</h2>
+                <div id="feed-container"></div>
+            </div>
+        </div>
+
+        <div id="status-grid"></div>
+    </div>
+
+    <script>
+        const AGENT_CONFIGS = {
+            alpha: { pos: { x: 45, y: 18 } },
+            js: { pos: { x: 15, y: 23 } },
+            super: { pos: { x: 75, y: 23 } },
+            agent-d: { pos: { x: 25, y: 63 } },
+            angel: { pos: { x: 65, y: 63 } }
+        };
+
+        const KEYWORD_MAP = {
+            'code': '🐍', 'python': '🐍', 'js': '🐍', 'script': '🐍',
+            'think': '💡', 'plan': '💡', 'idea': '💡', 'research': '💡',
+            'build': '🛠️', 'fix': '🛠️', 'tool': '🛠️', 'exec': '🛠️',
+            'cost': '💰', 'price': '💰', 'market': '💰', 'crypto': '💰',
+            'chat': '💬', 'msg': '💬', 'email': '💬'
+        };
+
+        function getSemanticIcon(activity) {
+            if (!activity) return '💬';
+            const lower = activity.toLowerCase();
+            for (const [kw, icon] of Object.entries(KEYWORD_MAP)) {
+                if (lower.includes(kw)) return icon;
+            }
+            return '💬';
+        }
+
+        function updateyour cityCycle() {
+            const now = new Date();
+            const torontoTime = new Intl.DateTimeFormat('en-US', {
+                timeZone: '$TZ',
+                hour: 'numeric',
+                hour12: false
+            }).format(now);
+            
+            const hour = parseInt(torontoTime);
+            const root = document.documentElement;
+            const workspace = document.getElementById('workspace');
+
+            if (hour >= 6 && hour < 17) { // Day
+                root.style.setProperty('--time-filter', 'rgba(0,0,0,0)');
+                root.style.setProperty('--window-bg', '#87ceeb');
+            } else if (hour >= 17 && hour < 20) { // Golden Hour
+                root.style.setProperty('--time-filter', 'rgba(255, 150, 0, 0.2)');
+                root.style.setProperty('--window-bg', '#ff7f50');
+            } else { // Night
+                root.style.setProperty('--time-filter', 'rgba(20, 20, 60, 0.5)');
+                root.style.setProperty('--window-bg', '#1a1c2c');
+            }
+        }
+
+        function updateWeather(condition) {
+            const weatherBox = document.getElementById('weather-box');
+            weatherBox.innerHTML = '';
+            
+            if (condition.includes('rain')) {
+                for(let i=0; i<20; i++) {
+                    const drop = document.createElement('div');
+                    drop.className = 'weather-particle';
+                    drop.style.width = '1px';
+                    drop.style.height = '10px';
+                    drop.style.left = Math.random() * 100 + '%';
+                    drop.style.top = '-10px';
+                    drop.style.animation = `rain ${0.5 + Math.random()}s linear infinite`;
+                    weatherBox.appendChild(drop);
+                }
+            } else if (condition.includes('snow') || condition.includes('flurries')) {
+                for(let i=0; i<15; i++) {
+                    const flake = document.createElement('div');
+                    flake.className = 'weather-particle';
+                    flake.style.width = '4px';
+                    flake.style.height = '4px';
+                    flake.style.left = Math.random() * 100 + '%';
+                    flake.style.top = '-5px';
+                    flake.style.opacity = Math.random();
+                    flake.style.animation = `snow ${2 + Math.random() * 2}s linear infinite`;
+                    weatherBox.appendChild(flake);
+                }
+            }
+        }
+
+        let catTargetAgent = null;
+        function updateChaosCat(agents) {
+            const cat = document.getElementById('chaos-cat');
+            const idleAgents = Object.entries(agents).filter(([id, info]) => info.status === 'Idle');
+            
+            if (idleAgents.length > 0) {
+                const [targetId] = idleAgents[Math.floor(Math.random() * idleAgents.length)];
+                const config = AGENT_CONFIGS[targetId];
+                cat.style.left = (config.pos.x + 2) + '%';
+                cat.style.top = (config.pos.y + 4) + '%';
+            } else {
+                cat.style.left = '85%';
+                cat.style.top = '10%';
+            }
+        }
+
+        async function updateDashboard() {
+            try {
+                const response = await fetch('agent_data.json?t=' + Date.now());
+                const data = await response.json();
+                
+                updateyour cityCycle();
+                updateChaosCat(data.agents);
+                // Simple weather detection from activity or hardcoded for now based on your city search
+                updateWeather('flurries'); 
+
+                const agentsLayer = document.getElementById('agents-layer');
+                const statusGrid = document.getElementById('status-grid');
+                const feedContainer = document.getElementById('feed-container');
+
+                // Update Agents
+                for (const [id, info] of Object.entries(data.agents)) {
+                    let el = document.getElementById('agent-' + id);
+                    const config = AGENT_CONFIGS[id] || { pos: { x: 50, y: 50 } };
+                    
+                    if (!el) {
+                        el = document.createElement('div');
+                        el.id = 'agent-' + id;
+                        el.className = 'agent ' + id;
+                        el.innerHTML = `
+                            <div class="status-bubble"></div>
+                            <div class="zzz">Zzz...</div>
+                            <div class="sprite-container">
+                                <div class="pixel-head"></div>
+                                <div class="pixel-body"></div>
+                            </div>
+                            <div class="agent-label"></div>
+                        `;
+                        el.style.left = config.pos.x + '%';
+                        el.style.top = config.pos.y + '%';
+                        agentsLayer.appendChild(el);
+                    }
+
+                    // Dynamic Z-Indexing based on Y position
+                    el.style.zIndex = Math.floor(config.pos.y) + 10;
+
+                    const isActive = info.status === 'Active';
+                    const isSleeping = info.status === 'Idle' || info.status === 'Sleeping';
+                    
+                    el.classList.toggle('active', isActive);
+                    el.classList.toggle('sleeping', isSleeping);
+                    
+                    const spriteContainer = el.querySelector('.sprite-container');
+                    spriteContainer.className = `sprite-container ${isActive ? 'working' : 'idle'}`;
+                    
+                    if (isSleeping) {
+                        spriteContainer.classList.remove('working');
+                        spriteContainer.classList.add('idle');
+                    }
+                    
+                    el.querySelector('.agent-label').textContent = info.name;
+                    el.querySelector('.status-bubble').textContent = getSemanticIcon(info.activity);
+                }
+
+                // Update Status Grid
+                statusGrid.innerHTML = '';
+                for (const [id, info] of Object.entries(data.agents)) {
+                    const card = document.createElement('div');
+                    card.className = 'agent-card' + (info.status === 'Active' ? ' active-card' : '');
+                    card.innerHTML = `
+                        <h3>${info.name}</h3>
+                        <p>${info.role}</p>
+                        <p class="activity-text">${info.activity}</p>
+                    `;
+                    statusGrid.appendChild(card);
+                }
+
+                // Update Feed
+                feedContainer.innerHTML = '';
+                data.recent_activity.slice(0, 10).forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'feed-item';
+                    div.textContent = item;
+                    feedContainer.appendChild(div);
+                });
+
+            } catch (e) { console.log("Syncing...", e); }
+        }
+
+        setInterval(updateDashboard, 3000);
+        updateDashboard();
+    </script>
+</body>
+</html>

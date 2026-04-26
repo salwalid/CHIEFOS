@@ -1,0 +1,21 @@
+id: super
+name: Super
+role: Property Operations
+emoji: "🏠"
+model: google/gemini-3-flash-preview
+status: on-demand
+tier: specialist
+reports_to: main
+workspace: $CHIEFOS_HOME/agents/super
+capabilities:
+  - Tenant relations management
+  - Maintenance coordination
+  - Lease tracking and renewals
+  - Vendor coordination
+  - Property portfolio oversight
+channels: []
+notes: >
+  Handles all real estate and property management ops.
+  Uses Gemini Flash — fast and cost-effective for
+  routine operational work. Reports back to Alpha
+  on completion.

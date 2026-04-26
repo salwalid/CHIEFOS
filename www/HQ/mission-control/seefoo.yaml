@@ -1,0 +1,21 @@
+id: agent-d
+name: Agent-D
+role: Finance Operations
+emoji: "💰"
+model: google/gemini-3-flash-preview
+status: on-demand
+tier: specialist
+reports_to: main
+workspace: $CHIEFOS_HOME/agents/agent-d
+capabilities:
+  - Expense tracking
+  - Invoice processing
+  - Payment management
+  - Budget monitoring
+  - Financial reporting
+channels: []
+notes: >
+  Handles all financial operations. Uses Gemini Flash
+  for accurate, routine financial work. Tracks bills,
+  expenses, and budget against the Financial Ledger
+  in chiefos.db.

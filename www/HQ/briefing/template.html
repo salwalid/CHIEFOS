@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Briefing — Daily Briefing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d0f14;
+  --surface: #13161d;
+  --panel: #181c26;
+  --border: #232838;
+  --border-hi: #2e3650;
+  --gemi: #34d399;
+  --gemi-dim: rgba(52,211,153,0.08);
+  --gemi-mid: rgba(52,211,153,0.18);
+  --antho: #60a5fa;
+  --antho-dim: rgba(96,165,250,0.08);
+  --antho-mid: rgba(96,165,250,0.18);
+  --chatty: #fb923c;
+  --chatty-dim: rgba(251,146,60,0.08);
+  --chatty-mid: rgba(251,146,60,0.18);
+  --gold: #e8c96d;
+  --gold-dim: rgba(232,201,109,0.1);
+  --text: #8492b4;
+  --text-mid: #a8b8d8;
+  --text-bright: #e4ecff;
+  --mono: 'DM Mono', monospace;
+  --serif: 'DM Serif Display', serif;
+  --sans: 'Outfit', sans-serif;
+  --active-color: var(--gemi);
+  --active-dim: var(--gemi-dim);
+  --active-mid: var(--gemi-mid);
+  --nav-w: 200px;
+  --header-h: 64px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  min-height: 100vh;
+  background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(96,165,250,0.04) 0%, transparent 60%);
+}
+.site-header {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: var(--header-h);
+  background: rgba(13,15,20,0.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  z-index: 100;
+  display: flex; align-items: center;
+  padding: 0 20px; gap: 16px;
+}
+.header-brand { display: flex; flex-direction: column; gap: 1px; flex-shrink: 0; }
+.header-brand .title { font-family: var(--serif); font-size: 17px; color: var(--text-bright); line-height: 1; }
+.header-brand .subtitle { font-family: var(--mono); font-size: 10px; color: var(--text); letter-spacing: 0.08em; }
+.header-date {
+  font-family: var(--mono); font-size: 11px; color: var(--gold);
+  background: var(--gold-dim); border: 1px solid rgba(232,201,109,0.2);
+  padding: 4px 10px; border-radius: 3px; flex-shrink: 0;
+}
+.header-spacer { flex: 1; }
+.agent-tabs { display: flex; gap: 4px; flex-shrink: 0; }
+.agent-tab {
+  font-family: var(--mono); font-size: 11px; font-weight: 500;
+  padding: 6px 14px; border-radius: 4px; border: 1px solid var(--border);
+  background: transparent; color: var(--text); cursor: pointer;
+  letter-spacing: 0.06em; transition: all 0.18s ease;
+}
+.agent-tab:hover { color: var(--text-mid); border-color: var(--border-hi); }
+.agent-tab.active-gemi { color: var(--gemi); background: var(--gemi-dim); border-color: rgba(52,211,153,0.3); }
+.agent-tab.active-antho { color: var(--antho); background: var(--antho-dim); border-color: rgba(96,165,250,0.3); }
+.agent-tab.active-chatty { color: var(--chatty); background: var(--chatty-dim); border-color: rgba(251,146,60,0.3); }
+.agent-tab .dot { display: inline-block; width: 5px; height: 5px; border-radius: 50%; margin-right: 5px; vertical-align: middle; margin-bottom: 1px; }
+.compare-toggle {
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--mono); font-size: 10px; color: var(--text);
+  cursor: pointer; flex-shrink: 0; padding: 6px 12px;
+  border: 1px solid var(--border); border-radius: 4px;
+  background: transparent; transition: all 0.18s ease; letter-spacing: 0.08em;
+}
+.compare-toggle:hover { border-color: var(--border-hi); color: var(--text-mid); }
+.compare-toggle.on { border-color: rgba(232,201,109,0.35); color: var(--gold); background: var(--gold-dim); }
+.toggle-knob { width: 28px; height: 15px; border-radius: 8px; background: var(--border-hi); position: relative; transition: background 0.2s; }
+.toggle-knob::after { content: ''; position: absolute; top: 2px; left: 2px; width: 11px; height: 11px; border-radius: 50%; background: var(--text); transition: all 0.2s; }
+.compare-toggle.on .toggle-knob { background: var(--gold); }
+.compare-toggle.on .toggle-knob::after { left: 15px; background: #fff; }
+.layout { display: flex; padding-top: var(--header-h); min-height: 100vh; }
+.section-nav {
+  width: var(--nav-w); position: fixed; top: var(--header-h); left: 0; bottom: 0;
+  overflow-y: auto; border-right: 1px solid var(--border);
+  background: var(--surface); padding: 20px 0; z-index: 50;
+}
+.section-nav::-webkit-scrollbar { width: 3px; }
+.section-nav::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 2px; }
+.nav-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em; color: var(--text); padding: 0 16px 10px; opacity: 0.6; }
+.nav-item {
+  display: flex; align-items: center; gap: 8px; padding: 9px 16px;
+  font-family: var(--sans); font-size: 12px; color: var(--text); cursor: pointer;
+  border-left: 2px solid transparent; transition: all 0.15s ease; text-decoration: none;
+}
+.nav-item:hover { color: var(--text-mid); background: rgba(255,255,255,0.02); }
+.nav-item.active { color: var(--active-color); border-left-color: var(--active-color); background: var(--active-dim); }
+.nav-emoji { font-size: 13px; flex-shrink: 0; }
+.nav-divider { height: 1px; background: var(--border); margin: 10px 16px; }
+.main { margin-left: var(--nav-w); flex: 1; padding: 32px; max-width: 100%; }
+.agent-panel { display: none; }
+.agent-panel.visible { display: block; animation: fadeIn 0.2s ease; }
+.compare-panel { display: none; }
+.compare-panel.visible { display: block; animation: fadeIn 0.2s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+.agent-hero { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+.agent-badge { width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+.badge-gemi { background: var(--gemi-dim); border: 1px solid rgba(52,211,153,0.2); }
+.badge-antho { background: var(--antho-dim); border: 1px solid rgba(96,165,250,0.2); }
+.badge-chatty { background: var(--chatty-dim); border: 1px solid rgba(251,146,60,0.2); }
+.agent-info .name { font-family: var(--serif); font-size: 22px; color: var(--text-bright); }
+.agent-info .model { font-family: var(--mono); font-size: 11px; color: var(--text); margin-top: 2px; }
+.section-block { margin-bottom: 36px; scroll-margin-top: calc(var(--header-h) + 20px); }
+.section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+.section-emoji { font-size: 18px; }
+.section-title { font-family: var(--sans); font-size: 14px; font-weight: 600; color: var(--text-bright); flex: 1; }
+.section-badge { font-family: var(--mono); font-size: 9px; padding: 2px 8px; border-radius: 3px; letter-spacing: 0.12em; background: var(--panel); border: 1px solid var(--border); color: var(--text); }
+.news-list { display: flex; flex-direction: column; gap: 10px; }
+.news-item { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 12px 14px; transition: border-color 0.15s; }
+.news-item:hover { border-color: var(--border-hi); }
+.news-item-header { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
+.news-num { font-family: var(--mono); font-size: 10px; color: var(--active-color); background: var(--active-dim); padding: 1px 6px; border-radius: 3px; flex-shrink: 0; margin-top: 1px; }
+.news-headline { font-size: 13px; font-weight: 500; color: var(--text-bright); line-height: 1.4; flex: 1; min-width: 200px; }
+.news-summary { font-size: 12px; color: var(--text-mid); line-height: 1.6; border-left: 2px solid var(--border); padding-left: 10px; margin-left: 2px; }
+.local-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.local-card { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 14px; }
+.local-card h4 { font-family: var(--mono); font-size: 10px; letter-spacing: 0.15em; color: var(--text); text-transform: uppercase; margin-bottom: 10px; }
+.weather-temp { font-family: var(--serif); font-size: 32px; color: var(--text-bright); line-height: 1; margin-bottom: 4px; }
+.weather-line { font-size: 13px; color: var(--text-mid); line-height: 1.7; }
+.traffic-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+.traffic-row:last-child { border-bottom: none; }
+.traffic-label { font-family: var(--mono); font-size: 11px; color: var(--text-mid); width: 70px; }
+.traffic-status { font-family: var(--mono); font-size: 10px; padding: 2px 8px; border-radius: 3px; font-weight: 500; letter-spacing: 0.08em; }
+.status-clear { background: rgba(52,211,153,0.1); color: #34d399; border: 1px solid rgba(52,211,153,0.2); }
+.status-moderate { background: rgba(251,191,36,0.1); color: #fbbf24; border: 1px solid rgba(251,191,36,0.2); }
+.status-heavy { background: rgba(248,113,113,0.1); color: #f87171; border: 1px solid rgba(248,113,113,0.2); }
+.traffic-detail { font-size: 11px; color: var(--text); }
+.linkedin-section { margin-top: 40px; }
+.linkedin-section-title { font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em; color: var(--text); text-transform: uppercase; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+.li-posts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.li-post { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 16px; position: relative; overflow: hidden; }
+.li-post::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+.li-post.architectural::before { background: var(--active-color); }
+.li-post.flashy::before { background: var(--gold); }
+.li-type-badge { font-family: var(--mono); font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; padding: 2px 8px; border-radius: 3px; margin-bottom: 10px; display: inline-block; }
+.architectural .li-type-badge { background: var(--active-dim); color: var(--active-color); border: 1px solid var(--active-mid); }
+.flashy .li-type-badge { background: var(--gold-dim); color: var(--gold); border: 1px solid rgba(232,201,109,0.25); }
+.li-title { font-family: var(--serif); font-size: 16px; color: var(--text-bright); line-height: 1.3; margin-bottom: 10px; }
+.li-field { margin-bottom: 8px; }
+.li-field-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; color: var(--text); text-transform: uppercase; margin-bottom: 3px; }
+.li-field-value { font-size: 12px; color: var(--text-mid); line-height: 1.55; }
+.li-link { font-family: var(--mono); font-size: 10px; color: var(--antho); word-break: break-all; text-decoration: none; }
+.li-link:hover { text-decoration: underline; }
+.li-hashtags { font-family: var(--mono); font-size: 10px; color: var(--active-color); margin-top: 10px; line-height: 1.6; }
+.compare-header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+.compare-title { font-family: var(--serif); font-size: 18px; color: var(--text-bright); }
+.compare-subtitle { font-family: var(--mono); font-size: 10px; color: var(--gold); letter-spacing: 0.1em; }
+.compare-section-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 24px; }
+.cmp-tab { font-size: 12px; padding: 6px 12px; border: 1px solid var(--border); border-radius: 4px; background: transparent; color: var(--text); cursor: pointer; transition: all 0.15s; font-family: var(--sans); }
+.cmp-tab:hover { border-color: var(--border-hi); color: var(--text-mid); }
+.cmp-tab.active { background: var(--gold-dim); border-color: rgba(232,201,109,0.3); color: var(--gold); }
+.compare-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.compare-col-header { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 6px 6px 0 0; font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: 0.08em; }
+.col-gemi { background: var(--gemi-dim); color: var(--gemi); border: 1px solid rgba(52,211,153,0.15); border-bottom: none; }
+.col-antho { background: var(--antho-dim); color: var(--antho); border: 1px solid rgba(96,165,250,0.15); border-bottom: none; }
+.col-chatty { background: var(--chatty-dim); color: var(--chatty); border: 1px solid rgba(251,146,60,0.15); border-bottom: none; }
+.compare-col-body { border-radius: 0 0 6px 6px; border: 1px solid var(--border); padding: 12px; background: var(--panel); display: flex; flex-direction: column; gap: 8px; }
+.cmp-item { padding: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; }
+.cmp-headline { font-size: 12px; font-weight: 500; color: var(--text-bright); margin-bottom: 5px; line-height: 1.4; }
+.cmp-summary { font-size: 11px; color: var(--text-mid); line-height: 1.55; }
+.placeholder-block { text-align: center; padding: 60px; color: var(--text); font-family: var(--mono); font-size: 12px; border: 1px dashed var(--border); border-radius: 8px; margin-top: 20px; line-height: 1.8; }
+.empty-marker { color: var(--text); opacity: 0.3; font-style: italic; font-size: 11px; }
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 2px; }
+@media (max-width: 768px) {
+  :root { --nav-w: 0px; }
+  .section-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; top: auto; width: 100%; height: auto; max-height: 60vh; border-right: none; border-top: 1px solid var(--border); padding: 16px 0; z-index: 200; }
+  .section-nav.mobile-open { display: block; }
+  .main { margin-left: 0; padding: 16px; }
+  .site-header { padding: 0 12px; gap: 8px; }
+  .header-date { display: none; }
+  .agent-tab { padding: 5px 10px; font-size: 10px; }
+  .compare-toggle { padding: 5px 8px; }
+  .toggle-label { display: none; }
+  .local-grid, .li-posts-grid, .compare-grid { grid-template-columns: 1fr; }
+  .mobile-nav-btn { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border: 1px solid var(--border); border-radius: 6px; background: transparent; color: var(--text); cursor: pointer; font-size: 16px; flex-shrink: 0; }
+  .nav-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 190; }
+  .nav-overlay.visible { display: block; }
+}
+@media (min-width: 769px) {
+  .mobile-nav-btn { display: none; }
+  .nav-overlay { display: none !important; }
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <button class="mobile-nav-btn" onclick="toggleMobileNav()">☰</button>
+  <div class="header-brand">
+    <div class="title">Daily Briefing</div>
+    <div class="subtitle">CHIEFOS · DAILY BRIEF</div>
+  </div>
+  <div class="header-date">📅 <!-- display-date --></div>
+  <div class="header-spacer"></div>
+  <div class="agent-tabs">
+    <button class="agent-tab active-gemi" onclick="switchAgent('gemi')" id="tab-gemi"><span class="dot" style="background:var(--gemi)"></span>Gemi</button>
+    <button class="agent-tab" onclick="switchAgent('antho')" id="tab-antho"><span class="dot" style="background:var(--antho)"></span>Antho</button>
+    <button class="agent-tab" onclick="switchAgent('chatty')" id="tab-chatty"><span class="dot" style="background:var(--chatty)"></span>Chatty</button>
+  </div>
+  <button class="compare-toggle" onclick="toggleCompare()" id="compare-btn">
+    <div class="toggle-knob"></div>
+    <span class="toggle-label">Compare</span>
+  </button>
+</header>
+
+<div class="nav-overlay" id="nav-overlay" onclick="toggleMobileNav()"></div>
+
+<div class="layout">
+  <nav class="section-nav" id="section-nav">
+    <div class="nav-label">Sections</div>
+    <a class="nav-item active" href="#s1" onclick="navClick(this)"><span class="nav-emoji">🧠</span>AI Research</a>
+    <a class="nav-item" href="#s2" onclick="navClick(this)"><span class="nav-emoji">⚛️</span>Quantum</a>
+    <a class="nav-item" href="#s3" onclick="navClick(this)"><span class="nav-emoji">🎙️</span>Creators</a>
+    <a class="nav-item" href="#s4" onclick="navClick(this)"><span class="nav-emoji">🟠</span>Reddit</a>
+    <a class="nav-item" href="#s5" onclick="navClick(this)"><span class="nav-emoji">🍁</span>your city</a>
+    <a class="nav-item" href="#s6" onclick="navClick(this)"><span class="nav-emoji">💻</span>Tech News</a>
+    <a class="nav-item" href="#s7" onclick="navClick(this)"><span class="nav-emoji">🇨🇦</span>Canada</a>
+    <a class="nav-item" href="#s8" onclick="navClick(this)"><span class="nav-emoji">🌍</span>World</a>
+    <div class="nav-divider"></div>
+    <a class="nav-item" href="#linkedin" onclick="navClick(this)"><span class="nav-emoji">📣</span>LinkedIn Posts</a>
+  </nav>
+
+  <main class="main">
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         AGENT-B PANEL
+         ═══════════════════════════════════════════════════════════════ -->
+    <div class="agent-panel visible" id="panel-gemi">
+      <div class="agent-hero">
+        <div class="agent-badge badge-gemi">♊</div>
+        <div class="agent-info">
+          <div class="name">Gemi</div>
+          <div class="model"><!-- gemi-info --></div>
+        </div>
+      </div>
+
+      <!-- S1: AI Research -->
+      <div class="section-block" id="s1">
+        <div class="section-header"><span class="section-emoji">🧠</span><span class="section-title">AI Research & Deep Tech</span><span class="section-badge">TOP 5</span></div>
+        <div class="news-list">
+          <div class="news-item"><div class="news-item-header"><span class="news-num">01</span><span class="news-headline"><!-- gemi-s1-h1 --></span></div><div class="news-summary"><!-- gemi-s1-s1 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">02</span><span class="news-headline"><!-- gemi-s1-h2 --></span></div><div class="news-summary"><!-- gemi-s1-s2 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">03</span><span class="news-headline"><!-- gemi-s1-h3 --></span></div><div class="news-summary"><!-- gemi-s1-s3 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">04</span><span class="news-headline"><!-- gemi-s1-h4 --></span></div><div class="news-summary"><!-- gemi-s1-s4 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">05</span><span class="news-headline"><!-- gemi-s1-h5 --></span></div><div class="news-summary"><!-- gemi-s1-s5 --></div></div>
+        </div>
+      </div>
+
+      <!-- S2: Quantum -->
+      <div class="section-block" id="s2">
+        <div class="section-header"><span class="section-emoji">⚛️</span><span class="section-title">Quantum Computing</span><span class="section-badge">TOP 5</span></div>
+        <div class="news-list">
+          <div class="news-item"><div class="news-item-header"><span class="news-num">01</span><span class="news-headline"><!-- gemi-s2-h1 --></span></div><div class="news-summary"><!-- gemi-s2-s1 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">02</span><span class="news-headline"><!-- gemi-s2-h2 --></span></div><div class="news-summary"><!-- gemi-s2-s2 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">03</span><span class="news-headline"><!-- gemi-s2-h3 --></span></div><div class="news-summary"><!-- gemi-s2-s3 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">04</span><span class="news-headline"><!-- gemi-s2-h4 --></span></div><div class="news-summary"><!-- gemi-s2-s4 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">05</span><span class="news-headline"><!-- gemi-s2-h5 --></span></div><div class="news-summary"><!-- gemi-s2-s5 --></div></div>
+        </div>
+      </div>
+
+      <!-- S3: Creators -->
+      <div class="section-block" id="s3">
+        <div class="section-header"><span class="section-emoji">🎙️</span><span class="section-title">Top Technical Creators</span><span class="section-badge">TOP 5</span></div>
+        <div class="news-list">
+          <div class="news-item"><div class="news-item-header"><span class="news-num">01</span><span class="news-headline"><!-- gemi-s3-h1 --></span></div><div class="news-summary"><!-- gemi-s3-s1 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">02</span><span class="news-headline"><!-- gemi-s3-h2 --></span></div><div class="news-summary"><!-- gemi-s3-s2 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">03</span><span class="news-headline"><!-- gemi-s3-h3 --></span></div><div class="news-summary"><!-- gemi-s3-s3 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">04</span><span class="news-headline"><!-- gemi-s3-h4 --></span></div><div class="news-summary"><!-- gemi-s3-s4 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">05</span><span class="news-headline"><!-- gemi-s3-h5 --></span></div><div class="news-summary"><!-- gemi-s3-s5 --></div></div>
+        </div>
+      </div>
+
+      <!-- S4: Reddit -->
+      <div class="section-block" id="s4">
+        <div class="section-header"><span class="section-emoji">🟠</span><span class="section-title">Reddit AI & Innovation</span><span class="section-badge">TOP 5</span></div>
+        <div class="news-list">
+          <div class="news-item"><div class="news-item-header"><span class="news-num">01</span><span class="news-headline"><!-- gemi-s4-h1 --></span></div><div class="news-summary"><!-- gemi-s4-s1 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">02</span><span class="news-headline"><!-- gemi-s4-h2 --></span></div><div class="news-summary"><!-- gemi-s4-s2 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">03</span><span class="news-headline"><!-- gemi-s4-h3 --></span></div><div class="news-summary"><!-- gemi-s4-s3 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">04</span><span class="news-headline"><!-- gemi-s4-h4 --></span></div><div class="news-summary"><!-- gemi-s4-s4 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">05</span><span class="news-headline"><!-- gemi-s4-h5 --></span></div><div class="news-summary"><!-- gemi-s4-s5 --></div></div>
+        </div>
+      </div>
+
+      <!-- S5: your city -->
+      <div class="section-block" id="s5">
+        <div class="section-header"><span class="section-emoji">🍁</span><span class="section-title">your city Overview</span><span class="section-badge">LIVE</span></div>
+        <div class="local-grid">
+          <div class="local-card">
+            <h4>🌤 Weather</h4>
+            <div class="weather-temp"><!-- gemi-s5-h1 --></div>
+            <div class="weather-line"><!-- gemi-s5-s1 --></div>
+          </div>
+          <div class="local-card">
+            <h4>🚗 Traffic</h4>
+            <div class="weather-line"><!-- gemi-s5-h2 --></div>
+            <div class="weather-line"><!-- gemi-s5-s2 --></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- S6: Tech News -->
+      <div class="section-block" id="s6">
+        <div class="section-header"><span class="section-emoji">💻</span><span class="section-title">Tech News</span><span class="section-badge">TOP 5</span></div>
+        <div class="news-list">
+          <div class="news-item"><div class="news-item-header"><span class="news-num">01</span><span class="news-headline"><!-- gemi-s6-h1 --></span></div><div class="news-summary"><!-- gemi-s6-s1 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">02</span><span class="news-headline"><!-- gemi-s6-h2 --></span></div><div class="news-summary"><!-- gemi-s6-s2 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">03</span><span class="news-headline"><!-- gemi-s6-h3 --></span></div><div class="news-summary"><!-- gemi-s6-s3 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">04</span><span class="news-headline"><!-- gemi-s6-h4 --></span></div><div class="news-summary"><!-- gemi-s6-s4 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">05</span><span class="news-headline"><!-- gemi-s6-h5 --></span></div><div class="news-summary"><!-- gemi-s6-s5 --></div></div>
+        </div>
+      </div>
+
+      <!-- S7: Canada -->
+      <div class="section-block" id="s7">
+        <div class="section-header"><span class="section-emoji">🇨🇦</span><span class="section-title">Canadian News</span><span class="section-badge">TOP 5</span></div>
+        <div class="news-list">
+          <div class="news-item"><div class="news-item-header"><span class="news-num">01</span><span class="news-headline"><!-- gemi-s7-h1 --></span></div><div class="news-summary"><!-- gemi-s7-s1 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">02</span><span class="news-headline"><!-- gemi-s7-h2 --></span></div><div class="news-summary"><!-- gemi-s7-s2 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">03</span><span class="news-headline"><!-- gemi-s7-h3 --></span></div><div class="news-summary"><!-- gemi-s7-s3 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">04</span><span class="news-headline"><!-- gemi-s7-h4 --></span></div><div class="news-summary"><!-- gemi-s7-s4 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">05</span><span class="news-headline"><!-- gemi-s7-h5 --></span></div><div class="news-summary"><!-- gemi-s7-s5 --></div></div>
+        </div>
+      </div>
+
+      <!-- S8: World -->
+      <div class="section-block" id="s8">
+        <div class="section-header"><span class="section-emoji">🌍</span><span class="section-title">World News</span><span class="section-badge">TOP 5</span></div>
+        <div class="news-list">
+          <div class="news-item"><div class="news-item-header"><span class="news-num">01</span><span class="news-headline"><!-- gemi-s8-h1 --></span></div><div class="news-summary"><!-- gemi-s8-s1 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">02</span><span class="news-headline"><!-- gemi-s8-h2 --></span></div><div class="news-summary"><!-- gemi-s8-s2 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">03</span><span class="news-headline"><!-- gemi-s8-h3 --></span></div><div class="news-summary"><!-- gemi-s8-s3 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">04</span><span class="news-headline"><!-- gemi-s8-h4 --></span></div><div class="news-summary"><!-- gemi-s8-s4 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">05</span><span class="news-headline"><!-- gemi-s8-h5 --></span></div><div class="news-summary"><!-- gemi-s8-s5 --></div></div>
+        </div>
+      </div>
+
+      <!-- LinkedIn -->
+      <div class="section-block linkedin-section" id="linkedin">
+        <div class="linkedin-section-title">📣 LinkedIn Posts — Gemi · 2 posts</div>
+        <div class="li-posts-grid">
+          <div class="li-post architectural">
+            <span class="li-type-badge">Architectural</span>
+            <div class="li-title"><!-- gemi-li-arch-title --></div>
+            <div class="li-field"><div class="li-field-label">Opening</div><div class="li-field-value"><!-- gemi-li-arch-opening --></div></div>
+            <div class="li-field"><div class="li-field-label">Body</div><div class="li-field-value"><!-- gemi-li-arch-body --></div></div>
+            <div class="li-field"><div class="li-field-label">Takeaway</div><div class="li-field-value"><!-- gemi-li-arch-takeaway --></div></div>
+            <div class="li-hashtags"><!-- gemi-li-arch-hashtags --></div>
+          </div>
+          <div class="li-post flashy">
+            <span class="li-type-badge">Flashy / Provoking</span>
+            <div class="li-title"><!-- gemi-li-flash-title --></div>
+            <div class="li-field"><div class="li-field-label">Opening</div><div class="li-field-value"><!-- gemi-li-flash-opening --></div></div>
+            <div class="li-field"><div class="li-field-label">Body</div><div class="li-field-value"><!-- gemi-li-flash-body --></div></div>
+            <div class="li-field"><div class="li-field-label">Takeaway</div><div class="li-field-value"><!-- gemi-li-flash-takeaway --></div></div>
+            <div class="li-hashtags"><!-- gemi-li-flash-hashtags --></div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /panel-gemi -->
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         AGENT-C PANEL (full structure, identical layout)
+         ═══════════════════════════════════════════════════════════════ -->
+    <div class="agent-panel" id="panel-antho">
+      <div class="agent-hero">
+        <div class="agent-badge badge-antho">✦</div>
+        <div class="agent-info">
+          <div class="name">Antho</div>
+          <div class="model"><!-- antho-info --></div>
+        </div>
+      </div>
+
+      <div class="section-block" id="antho-s1">
+        <div class="section-header"><span class="section-emoji">🧠</span><span class="section-title">AI Research & Deep Tech</span><span class="section-badge">TOP 5</span></div>
+        <div class="news-list">
+          <div class="news-item"><div class="news-item-header"><span class="news-num">01</span><span class="news-headline"><!-- antho-s1-h1 --></span></div><div class="news-summary"><!-- antho-s1-s1 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">02</span><span class="news-headline"><!-- antho-s1-h2 --></span></div><div class="news-summary"><!-- antho-s1-s2 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">03</span><span class="news-headline"><!-- antho-s1-h3 --></span></div><div class="news-summary"><!-- antho-s1-s3 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">04</span><span class="news-headline"><!-- antho-s1-h4 --></span></div><div class="news-summary"><!-- antho-s1-s4 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">05</span><span class="news-headline"><!-- antho-s1-h5 --></span></div><div class="news-summary"><!-- antho-s1-s5 --></div></div>
+        </div>
+      </div>
+      <div class="section-block" id="antho-s2">
+        <div class="section-header"><span class="section-emoji">⚛️</span><span class="section-title">Quantum Computing</span><span class="section-badge">TOP 5</span></div>
+        <div class="news-list">
+          <div class="news-item"><div class="news-item-header"><span class="news-num">01</span><span class="news-headline"><!-- antho-s2-h1 --></span></div><div class="news-summary"><!-- antho-s2-s1 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">02</span><span class="news-headline"><!-- antho-s2-h2 --></span></div><div class="news-summary"><!-- antho-s2-s2 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">03</span><span class="news-headline"><!-- antho-s2-h3 --></span></div><div class="news-summary"><!-- antho-s2-s3 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">04</span><span class="news-headline"><!-- antho-s2-h4 --></span></div><div class="news-summary"><!-- antho-s2-s4 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">05</span><span class="news-headline"><!-- antho-s2-h5 --></span></div><div class="news-summary"><!-- antho-s2-s5 --></div></div>
+        </div>
+      </div>
+      <div class="section-block" id="antho-s3">
+        <div class="section-header"><span class="section-emoji">🎙️</span><span class="section-title">Top Technical Creators</span><span class="section-badge">TOP 5</span></div>
+        <div class="news-list">
+          <div class="news-item"><div class="news-item-header"><span class="news-num">01</span><span class="news-headline"><!-- antho-s3-h1 --></span></div><div class="news-summary"><!-- antho-s3-s1 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">02</span><span class="news-headline"><!-- antho-s3-h2 --></span></div><div class="news-summary"><!-- antho-s3-s2 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">03</span><span class="news-headline"><!-- antho-s3-h3 --></span></div><div class="news-summary"><!-- antho-s3-s3 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">04</span><span class="news-headline"><!-- antho-s3-h4 --></span></div><div class="news-summary"><!-- antho-s3-s4 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">05</span><span class="news-headline"><!-- antho-s3-h5 --></span></div><div class="news-summary"><!-- antho-s3-s5 --></div></div>
+        </div>
+      </div>
+      <div class="section-block" id="antho-s4">
+        <div class="section-header"><span class="section-emoji">🟠</span><span class="section-title">Reddit AI & Innovation</span><span class="section-badge">TOP 5</span></div>
+        <div class="news-list">
+          <div class="news-item"><div class="news-item-header"><span class="news-num">01</span><span class="news-headline"><!-- antho-s4-h1 --></span></div><div class="news-summary"><!-- antho-s4-s1 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">02</span><span class="news-headline"><!-- antho-s4-h2 --></span></div><div class="news-summary"><!-- antho-s4-s2 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">03</span><span class="news-headline"><!-- antho-s4-h3 --></span></div><div class="news-summary"><!-- antho-s4-s3 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">04</span><span class="news-headline"><!-- antho-s4-h4 --></span></div><div class="news-summary"><!-- antho-s4-s4 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">05</span><span class="news-headline"><!-- antho-s4-h5 --></span></div><div class="news-summary"><!-- antho-s4-s5 --></div></div>
+        </div>
+      </div>
+      <div class="section-block" id="antho-s5">
+        <div class="section-header"><span class="section-emoji">🍁</span><span class="section-title">your city Overview</span><span class="section-badge">LIVE</span></div>
+        <div class="local-grid">
+          <div class="local-card"><h4>🌤 Weather</h4><div class="weather-temp"><!-- antho-s5-h1 --></div><div class="weather-line"><!-- antho-s5-s1 --></div></div>
+          <div class="local-card"><h4>🚗 Traffic</h4><div class="weather-line"><!-- antho-s5-h2 --></div><div class="weather-line"><!-- antho-s5-s2 --></div></div>
+        </div>
+      </div>
+      <div class="section-block" id="antho-s6">
+        <div class="section-header"><span class="section-emoji">💻</span><span class="section-title">Tech News</span><span class="section-badge">TOP 5</span></div>
+        <div class="news-list">
+          <div class="news-item"><div class="news-item-header"><span class="news-num">01</span><span class="news-headline"><!-- antho-s6-h1 --></span></div><div class="news-summary"><!-- antho-s6-s1 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">02</span><span class="news-headline"><!-- antho-s6-h2 --></span></div><div class="news-summary"><!-- antho-s6-s2 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">03</span><span class="news-headline"><!-- antho-s6-h3 --></span></div><div class="news-summary"><!-- antho-s6-s3 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">04</span><span class="news-headline"><!-- antho-s6-h4 --></span></div><div class="news-summary"><!-- antho-s6-s4 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">05</span><span class="news-headline"><!-- antho-s6-h5 --></span></div><div class="news-summary"><!-- antho-s6-s5 --></div></div>
+        </div>
+      </div>
+      <div class="section-block" id="antho-s7">
+        <div class="section-header"><span class="section-emoji">🇨🇦</span><span class="section-title">Canadian News</span><span class="section-badge">TOP 5</span></div>
+        <div class="news-list">
+          <div class="news-item"><div class="news-item-header"><span class="news-num">01</span><span class="news-headline"><!-- antho-s7-h1 --></span></div><div class="news-summary"><!-- antho-s7-s1 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">02</span><span class="news-headline"><!-- antho-s7-h2 --></span></div><div class="news-summary"><!-- antho-s7-s2 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">03</span><span class="news-headline"><!-- antho-s7-h3 --></span></div><div class="news-summary"><!-- antho-s7-s3 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">04</span><span class="news-headline"><!-- antho-s7-h4 --></span></div><div class="news-summary"><!-- antho-s7-s4 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">05</span><span class="news-headline"><!-- antho-s7-h5 --></span></div><div class="news-summary"><!-- antho-s7-s5 --></div></div>
+        </div>
+      </div>
+      <div class="section-block" id="antho-s8">
+        <div class="section-header"><span class="section-emoji">🌍</span><span class="section-title">World News</span><span class="section-badge">TOP 5</span></div>
+        <div class="news-list">
+          <div class="news-item"><div class="news-item-header"><span class="news-num">01</span><span class="news-headline"><!-- antho-s8-h1 --></span></div><div class="news-summary"><!-- antho-s8-s1 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">02</span><span class="news-headline"><!-- antho-s8-h2 --></span></div><div class="news-summary"><!-- antho-s8-s2 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">03</span><span class="news-headline"><!-- antho-s8-h3 --></span></div><div class="news-summary"><!-- antho-s8-s3 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">04</span><span class="news-headline"><!-- antho-s8-h4 --></span></div><div class="news-summary"><!-- antho-s8-s4 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">05</span><span class="news-headline"><!-- antho-s8-h5 --></span></div><div class="news-summary"><!-- antho-s8-s5 --></div></div>
+        </div>
+      </div>
+      <div class="section-block linkedin-section" id="antho-linkedin">
+        <div class="linkedin-section-title">📣 LinkedIn Posts — Antho · 2 posts</div>
+        <div class="li-posts-grid">
+          <div class="li-post architectural">
+            <span class="li-type-badge">Architectural</span>
+            <div class="li-title"><!-- antho-li-arch-title --></div>
+            <div class="li-field"><div class="li-field-label">Opening</div><div class="li-field-value"><!-- antho-li-arch-opening --></div></div>
+            <div class="li-field"><div class="li-field-label">Body</div><div class="li-field-value"><!-- antho-li-arch-body --></div></div>
+            <div class="li-field"><div class="li-field-label">Takeaway</div><div class="li-field-value"><!-- antho-li-arch-takeaway --></div></div>
+            <div class="li-hashtags"><!-- antho-li-arch-hashtags --></div>
+          </div>
+          <div class="li-post flashy">
+            <span class="li-type-badge">Flashy / Provoking</span>
+            <div class="li-title"><!-- antho-li-flash-title --></div>
+            <div class="li-field"><div class="li-field-label">Opening</div><div class="li-field-value"><!-- antho-li-flash-opening --></div></div>
+            <div class="li-field"><div class="li-field-label">Body</div><div class="li-field-value"><!-- antho-li-flash-body --></div></div>
+            <div class="li-field"><div class="li-field-label">Takeaway</div><div class="li-field-value"><!-- antho-li-flash-takeaway --></div></div>
+            <div class="li-hashtags"><!-- antho-li-flash-hashtags --></div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /panel-antho -->
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         CHATTY PANEL (full structure, identical layout)
+         ═══════════════════════════════════════════════════════════════ -->
+    <div class="agent-panel" id="panel-chatty">
+      <div class="agent-hero">
+        <div class="agent-badge badge-chatty">💬</div>
+        <div class="agent-info">
+          <div class="name">Chatty</div>
+          <div class="model"><!-- chatty-info --></div>
+        </div>
+      </div>
+
+      <div class="section-block" id="chatty-s1">
+        <div class="section-header"><span class="section-emoji">🧠</span><span class="section-title">AI Research & Deep Tech</span><span class="section-badge">TOP 5</span></div>
+        <div class="news-list">
+          <div class="news-item"><div class="news-item-header"><span class="news-num">01</span><span class="news-headline"><!-- chatty-s1-h1 --></span></div><div class="news-summary"><!-- chatty-s1-s1 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">02</span><span class="news-headline"><!-- chatty-s1-h2 --></span></div><div class="news-summary"><!-- chatty-s1-s2 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">03</span><span class="news-headline"><!-- chatty-s1-h3 --></span></div><div class="news-summary"><!-- chatty-s1-s3 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">04</span><span class="news-headline"><!-- chatty-s1-h4 --></span></div><div class="news-summary"><!-- chatty-s1-s4 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">05</span><span class="news-headline"><!-- chatty-s1-h5 --></span></div><div class="news-summary"><!-- chatty-s1-s5 --></div></div>
+        </div>
+      </div>
+      <div class="section-block" id="chatty-s2">
+        <div class="section-header"><span class="section-emoji">⚛️</span><span class="section-title">Quantum Computing</span><span class="section-badge">TOP 5</span></div>
+        <div class="news-list">
+          <div class="news-item"><div class="news-item-header"><span class="news-num">01</span><span class="news-headline"><!-- chatty-s2-h1 --></span></div><div class="news-summary"><!-- chatty-s2-s1 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">02</span><span class="news-headline"><!-- chatty-s2-h2 --></span></div><div class="news-summary"><!-- chatty-s2-s2 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">03</span><span class="news-headline"><!-- chatty-s2-h3 --></span></div><div class="news-summary"><!-- chatty-s2-s3 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">04</span><span class="news-headline"><!-- chatty-s2-h4 --></span></div><div class="news-summary"><!-- chatty-s2-s4 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">05</span><span class="news-headline"><!-- chatty-s2-h5 --></span></div><div class="news-summary"><!-- chatty-s2-s5 --></div></div>
+        </div>
+      </div>
+      <div class="section-block" id="chatty-s3">
+        <div class="section-header"><span class="section-emoji">🎙️</span><span class="section-title">Top Technical Creators</span><span class="section-badge">TOP 5</span></div>
+        <div class="news-list">
+          <div class="news-item"><div class="news-item-header"><span class="news-num">01</span><span class="news-headline"><!-- chatty-s3-h1 --></span></div><div class="news-summary"><!-- chatty-s3-s1 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">02</span><span class="news-headline"><!-- chatty-s3-h2 --></span></div><div class="news-summary"><!-- chatty-s3-s2 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">03</span><span class="news-headline"><!-- chatty-s3-h3 --></span></div><div class="news-summary"><!-- chatty-s3-s3 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">04</span><span class="news-headline"><!-- chatty-s3-h4 --></span></div><div class="news-summary"><!-- chatty-s3-s4 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">05</span><span class="news-headline"><!-- chatty-s3-h5 --></span></div><div class="news-summary"><!-- chatty-s3-s5 --></div></div>
+        </div>
+      </div>
+      <div class="section-block" id="chatty-s4">
+        <div class="section-header"><span class="section-emoji">🟠</span><span class="section-title">Reddit AI & Innovation</span><span class="section-badge">TOP 5</span></div>
+        <div class="news-list">
+          <div class="news-item"><div class="news-item-header"><span class="news-num">01</span><span class="news-headline"><!-- chatty-s4-h1 --></span></div><div class="news-summary"><!-- chatty-s4-s1 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">02</span><span class="news-headline"><!-- chatty-s4-h2 --></span></div><div class="news-summary"><!-- chatty-s4-s2 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">03</span><span class="news-headline"><!-- chatty-s4-h3 --></span></div><div class="news-summary"><!-- chatty-s4-s3 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">04</span><span class="news-headline"><!-- chatty-s4-h4 --></span></div><div class="news-summary"><!-- chatty-s4-s4 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">05</span><span class="news-headline"><!-- chatty-s4-h5 --></span></div><div class="news-summary"><!-- chatty-s4-s5 --></div></div>
+        </div>
+      </div>
+      <div class="section-block" id="chatty-s5">
+        <div class="section-header"><span class="section-emoji">🍁</span><span class="section-title">your city Overview</span><span class="section-badge">LIVE</span></div>
+        <div class="local-grid">
+          <div class="local-card"><h4>🌤 Weather</h4><div class="weather-temp"><!-- chatty-s5-h1 --></div><div class="weather-line"><!-- chatty-s5-s1 --></div></div>
+          <div class="local-card"><h4>🚗 Traffic</h4><div class="weather-line"><!-- chatty-s5-h2 --></div><div class="weather-line"><!-- chatty-s5-s2 --></div></div>
+        </div>
+      </div>
+      <div class="section-block" id="chatty-s6">
+        <div class="section-header"><span class="section-emoji">💻</span><span class="section-title">Tech News</span><span class="section-badge">TOP 5</span></div>
+        <div class="news-list">
+          <div class="news-item"><div class="news-item-header"><span class="news-num">01</span><span class="news-headline"><!-- chatty-s6-h1 --></span></div><div class="news-summary"><!-- chatty-s6-s1 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">02</span><span class="news-headline"><!-- chatty-s6-h2 --></span></div><div class="news-summary"><!-- chatty-s6-s2 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">03</span><span class="news-headline"><!-- chatty-s6-h3 --></span></div><div class="news-summary"><!-- chatty-s6-s3 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">04</span><span class="news-headline"><!-- chatty-s6-h4 --></span></div><div class="news-summary"><!-- chatty-s6-s4 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">05</span><span class="news-headline"><!-- chatty-s6-h5 --></span></div><div class="news-summary"><!-- chatty-s6-s5 --></div></div>
+        </div>
+      </div>
+      <div class="section-block" id="chatty-s7">
+        <div class="section-header"><span class="section-emoji">🇨🇦</span><span class="section-title">Canadian News</span><span class="section-badge">TOP 5</span></div>
+        <div class="news-list">
+          <div class="news-item"><div class="news-item-header"><span class="news-num">01</span><span class="news-headline"><!-- chatty-s7-h1 --></span></div><div class="news-summary"><!-- chatty-s7-s1 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">02</span><span class="news-headline"><!-- chatty-s7-h2 --></span></div><div class="news-summary"><!-- chatty-s7-s2 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">03</span><span class="news-headline"><!-- chatty-s7-h3 --></span></div><div class="news-summary"><!-- chatty-s7-s3 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">04</span><span class="news-headline"><!-- chatty-s7-h4 --></span></div><div class="news-summary"><!-- chatty-s7-s4 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">05</span><span class="news-headline"><!-- chatty-s7-h5 --></span></div><div class="news-summary"><!-- chatty-s7-s5 --></div></div>
+        </div>
+      </div>
+      <div class="section-block" id="chatty-s8">
+        <div class="section-header"><span class="section-emoji">🌍</span><span class="section-title">World News</span><span class="section-badge">TOP 5</span></div>
+        <div class="news-list">
+          <div class="news-item"><div class="news-item-header"><span class="news-num">01</span><span class="news-headline"><!-- chatty-s8-h1 --></span></div><div class="news-summary"><!-- chatty-s8-s1 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">02</span><span class="news-headline"><!-- chatty-s8-h2 --></span></div><div class="news-summary"><!-- chatty-s8-s2 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">03</span><span class="news-headline"><!-- chatty-s8-h3 --></span></div><div class="news-summary"><!-- chatty-s8-s3 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">04</span><span class="news-headline"><!-- chatty-s8-h4 --></span></div><div class="news-summary"><!-- chatty-s8-s4 --></div></div>
+          <div class="news-item"><div class="news-item-header"><span class="news-num">05</span><span class="news-headline"><!-- chatty-s8-h5 --></span></div><div class="news-summary"><!-- chatty-s8-s5 --></div></div>
+        </div>
+      </div>
+      <div class="section-block linkedin-section" id="chatty-linkedin">
+        <div class="linkedin-section-title">📣 LinkedIn Posts — Chatty · 2 posts</div>
+        <div class="li-posts-grid">
+          <div class="li-post architectural">
+            <span class="li-type-badge">Architectural</span>
+            <div class="li-title"><!-- chatty-li-arch-title --></div>
+            <div class="li-field"><div class="li-field-label">Opening</div><div class="li-field-value"><!-- chatty-li-arch-opening --></div></div>
+            <div class="li-field"><div class="li-field-label">Body</div><div class="li-field-value"><!-- chatty-li-arch-body --></div></div>
+            <div class="li-field"><div class="li-field-label">Takeaway</div><div class="li-field-value"><!-- chatty-li-arch-takeaway --></div></div>
+            <div class="li-hashtags"><!-- chatty-li-arch-hashtags --></div>
+          </div>
+          <div class="li-post flashy">
+            <span class="li-type-badge">Flashy / Provoking</span>
+            <div class="li-title"><!-- chatty-li-flash-title --></div>
+            <div class="li-field"><div class="li-field-label">Opening</div><div class="li-field-value"><!-- chatty-li-flash-opening --></div></div>
+            <div class="li-field"><div class="li-field-label">Body</div><div class="li-field-value"><!-- chatty-li-flash-body --></div></div>
+            <div class="li-field"><div class="li-field-label">Takeaway</div><div class="li-field-value"><!-- chatty-li-flash-takeaway --></div></div>
+            <div class="li-hashtags"><!-- chatty-li-flash-hashtags --></div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /panel-chatty -->
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         COMPARE PANEL
+         ═══════════════════════════════════════════════════════════════ -->
+    <div class="compare-panel" id="compare-panel">
+      <div class="compare-header">
+        <div>
+          <div class="compare-title">Compare Mode</div>
+          <div class="compare-subtitle">ALL THREE AGENTS · SAME SECTION SIDE BY SIDE</div>
+        </div>
+      </div>
+      <div class="compare-section-tabs">
+        <button class="cmp-tab active" onclick="cmpSection(this,'cmp-ai')">🧠 AI Research</button>
+        <button class="cmp-tab" onclick="cmpSection(this,'cmp-quantum')">⚛️ Quantum</button>
+        <button class="cmp-tab" onclick="cmpSection(this,'cmp-creators')">🎙️ Creators</button>
+        <button class="cmp-tab" onclick="cmpSection(this,'cmp-reddit')">🟠 Reddit</button>
+        <button class="cmp-tab" onclick="cmpSection(this,'cmp-tech')">💻 Tech</button>
+        <button class="cmp-tab" onclick="cmpSection(this,'cmp-canada')">🇨🇦 Canada</button>
+        <button class="cmp-tab" onclick="cmpSection(this,'cmp-world')">🌍 World</button>
+        <button class="cmp-tab" onclick="cmpSection(this,'cmp-li')">📣 LinkedIn</button>
+      </div>
+
+      <!-- Compare: AI Research (s1) -->
+      <div class="cmp-section" id="cmp-ai">
+        <div class="compare-grid">
+          <div>
+            <div class="compare-col-header col-gemi">♊ Gemi · Gemini</div>
+            <div class="compare-col-body">
+              <div class="cmp-item"><div class="cmp-headline"><!-- cmp-gemi-s1-h1 --></div><div class="cmp-summary"><!-- cmp-gemi-s1-s1 --></div></div>
+              <div class="cmp-item"><div class="cmp-headline"><!-- cmp-gemi-s1-h2 --></div><div class="cmp-summary"><!-- cmp-gemi-s1-s2 --></div></div>
+              <div class="cmp-item"><div class="cmp-headline"><!-- cmp-gemi-s1-h3 --></div><div class="cmp-summary"><!-- cmp-gemi-s1-s3 --></div></div>
+              <div class="cmp-item"><div class="cmp-headline"><!-- cmp-gemi-s1-h4 --></div><div class="cmp-summary"><!-- cmp-gemi-s1-s4 --></div></div>
+              <div class="cmp-item"><div class="cmp-headline"><!-- cmp-gemi-s1-h5 --></div><div class="cmp-summary"><!-- cmp-gemi-s1-s5 --></div></div>
+            </div>
+          </div>
+          <div>
+            <div class="compare-col-header col-antho">✦ Antho · Opus</div>
+            <div class="compare-col-body">
+              <div class="cmp-item"><div class="cmp-headline"><!-- cmp-antho-s1-h1 --></div><div class="cmp-summary"><!-- cmp-antho-s1-s1 --></div></div>
+              <div class="cmp-item"><div class="cmp-headline"><!-- cmp-antho-s1-h2 --></div><div class="cmp-summary"><!-- cmp-antho-s1-s2 --></div></div>
+              <div class="cmp-item"><div class="cmp-headline"><!-- cmp-antho-s1-h3 --></div><div class="cmp-summary"><!-- cmp-antho-s1-s3 --></div></div>
+              <div class="cmp-item"><div class="cmp-headline"><!-- cmp-antho-s1-h4 --></div><div class="cmp-summary"><!-- cmp-antho-s1-s4 --></div></div>
+              <div class="cmp-item"><div class="cmp-headline"><!-- cmp-antho-s1-h5 --></div><div class="cmp-summary"><!-- cmp-antho-s1-s5 --></div></div>
+            </div>
+          </div>
+          <div>
+            <div class="compare-col-header col-chatty">💬 Chatty · GPT-4o</div>
+            <div class="compare-col-body">
+              <div class="cmp-item"><div class="cmp-headline"><!-- cmp-chatty-s1-h1 --></div><div class="cmp-summary"><!-- cmp-chatty-s1-s1 --></div></div>
+              <div class="cmp-item"><div class="cmp-headline"><!-- cmp-chatty-s1-h2 --></div><div class="cmp-summary"><!-- cmp-chatty-s1-s2 --></div></div>
+              <div class="cmp-item"><div class="cmp-headline"><!-- cmp-chatty-s1-h3 --></div><div class="cmp-summary"><!-- cmp-chatty-s1-s3 --></div></div>
+              <div class="cmp-item"><div class="cmp-headline"><!-- cmp-chatty-s1-h4 --></div><div class="cmp-summary"><!-- cmp-chatty-s1-s4 --></div></div>
+              <div class="cmp-item"><div class="cmp-headline"><!-- cmp-chatty-s1-h5 --></div><div class="cmp-summary"><!-- cmp-chatty-s1-s5 --></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Compare: Quantum (s2) -->
+      <div class="cmp-section" id="cmp-quantum" style="display:none">
+        <div class="compare-grid">
+          <div><div class="compare-col-header col-gemi">♊ Gemi · Gemini</div><div class="compare-col-body">
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-gemi-s2-h1 --></div><div class="cmp-summary"><!-- cmp-gemi-s2-s1 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-gemi-s2-h2 --></div><div class="cmp-summary"><!-- cmp-gemi-s2-s2 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-gemi-s2-h3 --></div><div class="cmp-summary"><!-- cmp-gemi-s2-s3 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-gemi-s2-h4 --></div><div class="cmp-summary"><!-- cmp-gemi-s2-s4 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-gemi-s2-h5 --></div><div class="cmp-summary"><!-- cmp-gemi-s2-s5 --></div></div>
+          </div></div>
+          <div><div class="compare-col-header col-antho">✦ Antho · Opus</div><div class="compare-col-body">
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-antho-s2-h1 --></div><div class="cmp-summary"><!-- cmp-antho-s2-s1 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-antho-s2-h2 --></div><div class="cmp-summary"><!-- cmp-antho-s2-s2 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-antho-s2-h3 --></div><div class="cmp-summary"><!-- cmp-antho-s2-s3 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-antho-s2-h4 --></div><div class="cmp-summary"><!-- cmp-antho-s2-s4 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-antho-s2-h5 --></div><div class="cmp-summary"><!-- cmp-antho-s2-s5 --></div></div>
+          </div></div>
+          <div><div class="compare-col-header col-chatty">💬 Chatty · GPT-4o</div><div class="compare-col-body">
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-chatty-s2-h1 --></div><div class="cmp-summary"><!-- cmp-chatty-s2-s1 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-chatty-s2-h2 --></div><div class="cmp-summary"><!-- cmp-chatty-s2-s2 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-chatty-s2-h3 --></div><div class="cmp-summary"><!-- cmp-chatty-s2-s3 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-chatty-s2-h4 --></div><div class="cmp-summary"><!-- cmp-chatty-s2-s4 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-chatty-s2-h5 --></div><div class="cmp-summary"><!-- cmp-chatty-s2-s5 --></div></div>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- Compare: Creators (s3) -->
+      <div class="cmp-section" id="cmp-creators" style="display:none">
+        <div class="compare-grid">
+          <div><div class="compare-col-header col-gemi">♊ Gemi · Gemini</div><div class="compare-col-body">
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-gemi-s3-h1 --></div><div class="cmp-summary"><!-- cmp-gemi-s3-s1 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-gemi-s3-h2 --></div><div class="cmp-summary"><!-- cmp-gemi-s3-s2 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-gemi-s3-h3 --></div><div class="cmp-summary"><!-- cmp-gemi-s3-s3 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-gemi-s3-h4 --></div><div class="cmp-summary"><!-- cmp-gemi-s3-s4 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-gemi-s3-h5 --></div><div class="cmp-summary"><!-- cmp-gemi-s3-s5 --></div></div>
+          </div></div>
+          <div><div class="compare-col-header col-antho">✦ Antho · Opus</div><div class="compare-col-body">
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-antho-s3-h1 --></div><div class="cmp-summary"><!-- cmp-antho-s3-s1 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-antho-s3-h2 --></div><div class="cmp-summary"><!-- cmp-antho-s3-s2 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-antho-s3-h3 --></div><div class="cmp-summary"><!-- cmp-antho-s3-s3 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-antho-s3-h4 --></div><div class="cmp-summary"><!-- cmp-antho-s3-s4 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-antho-s3-h5 --></div><div class="cmp-summary"><!-- cmp-antho-s3-s5 --></div></div>
+          </div></div>
+          <div><div class="compare-col-header col-chatty">💬 Chatty · GPT-4o</div><div class="compare-col-body">
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-chatty-s3-h1 --></div><div class="cmp-summary"><!-- cmp-chatty-s3-s1 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-chatty-s3-h2 --></div><div class="cmp-summary"><!-- cmp-chatty-s3-s2 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-chatty-s3-h3 --></div><div class="cmp-summary"><!-- cmp-chatty-s3-s3 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-chatty-s3-h4 --></div><div class="cmp-summary"><!-- cmp-chatty-s3-s4 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-chatty-s3-h5 --></div><div class="cmp-summary"><!-- cmp-chatty-s3-s5 --></div></div>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- Compare: Reddit (s4) -->
+      <div class="cmp-section" id="cmp-reddit" style="display:none">
+        <div class="compare-grid">
+          <div><div class="compare-col-header col-gemi">♊ Gemi · Gemini</div><div class="compare-col-body">
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-gemi-s4-h1 --></div><div class="cmp-summary"><!-- cmp-gemi-s4-s1 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-gemi-s4-h2 --></div><div class="cmp-summary"><!-- cmp-gemi-s4-s2 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-gemi-s4-h3 --></div><div class="cmp-summary"><!-- cmp-gemi-s4-s3 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-gemi-s4-h4 --></div><div class="cmp-summary"><!-- cmp-gemi-s4-s4 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-gemi-s4-h5 --></div><div class="cmp-summary"><!-- cmp-gemi-s4-s5 --></div></div>
+          </div></div>
+          <div><div class="compare-col-header col-antho">✦ Antho · Opus</div><div class="compare-col-body">
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-antho-s4-h1 --></div><div class="cmp-summary"><!-- cmp-antho-s4-s1 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-antho-s4-h2 --></div><div class="cmp-summary"><!-- cmp-antho-s4-s2 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-antho-s4-h3 --></div><div class="cmp-summary"><!-- cmp-antho-s4-s3 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-antho-s4-h4 --></div><div class="cmp-summary"><!-- cmp-antho-s4-s4 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-antho-s4-h5 --></div><div class="cmp-summary"><!-- cmp-antho-s4-s5 --></div></div>
+          </div></div>
+          <div><div class="compare-col-header col-chatty">💬 Chatty · GPT-4o</div><div class="compare-col-body">
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-chatty-s4-h1 --></div><div class="cmp-summary"><!-- cmp-chatty-s4-s1 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-chatty-s4-h2 --></div><div class="cmp-summary"><!-- cmp-chatty-s4-s2 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-chatty-s4-h3 --></div><div class="cmp-summary"><!-- cmp-chatty-s4-s3 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-chatty-s4-h4 --></div><div class="cmp-summary"><!-- cmp-chatty-s4-s4 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-chatty-s4-h5 --></div><div class="cmp-summary"><!-- cmp-chatty-s4-s5 --></div></div>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- Compare: Tech (s6) — skipping s5 your city since it's weather/traffic, not comparable -->
+      <div class="cmp-section" id="cmp-tech" style="display:none">
+        <div class="compare-grid">
+          <div><div class="compare-col-header col-gemi">♊ Gemi · Gemini</div><div class="compare-col-body">
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-gemi-s6-h1 --></div><div class="cmp-summary"><!-- cmp-gemi-s6-s1 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-gemi-s6-h2 --></div><div class="cmp-summary"><!-- cmp-gemi-s6-s2 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-gemi-s6-h3 --></div><div class="cmp-summary"><!-- cmp-gemi-s6-s3 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-gemi-s6-h4 --></div><div class="cmp-summary"><!-- cmp-gemi-s6-s4 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-gemi-s6-h5 --></div><div class="cmp-summary"><!-- cmp-gemi-s6-s5 --></div></div>
+          </div></div>
+          <div><div class="compare-col-header col-antho">✦ Antho · Opus</div><div class="compare-col-body">
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-antho-s6-h1 --></div><div class="cmp-summary"><!-- cmp-antho-s6-s1 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-antho-s6-h2 --></div><div class="cmp-summary"><!-- cmp-antho-s6-s2 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-antho-s6-h3 --></div><div class="cmp-summary"><!-- cmp-antho-s6-s3 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-antho-s6-h4 --></div><div class="cmp-summary"><!-- cmp-antho-s6-s4 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-antho-s6-h5 --></div><div class="cmp-summary"><!-- cmp-antho-s6-s5 --></div></div>
+          </div></div>
+          <div><div class="compare-col-header col-chatty">💬 Chatty · GPT-4o</div><div class="compare-col-body">
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-chatty-s6-h1 --></div><div class="cmp-summary"><!-- cmp-chatty-s6-s1 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-chatty-s6-h2 --></div><div class="cmp-summary"><!-- cmp-chatty-s6-s2 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-chatty-s6-h3 --></div><div class="cmp-summary"><!-- cmp-chatty-s6-s3 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-chatty-s6-h4 --></div><div class="cmp-summary"><!-- cmp-chatty-s6-s4 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-chatty-s6-h5 --></div><div class="cmp-summary"><!-- cmp-chatty-s6-s5 --></div></div>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- Compare: Canada (s7) -->
+      <div class="cmp-section" id="cmp-canada" style="display:none">
+        <div class="compare-grid">
+          <div><div class="compare-col-header col-gemi">♊ Gemi · Gemini</div><div class="compare-col-body">
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-gemi-s7-h1 --></div><div class="cmp-summary"><!-- cmp-gemi-s7-s1 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-gemi-s7-h2 --></div><div class="cmp-summary"><!-- cmp-gemi-s7-s2 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-gemi-s7-h3 --></div><div class="cmp-summary"><!-- cmp-gemi-s7-s3 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-gemi-s7-h4 --></div><div class="cmp-summary"><!-- cmp-gemi-s7-s4 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-gemi-s7-h5 --></div><div class="cmp-summary"><!-- cmp-gemi-s7-s5 --></div></div>
+          </div></div>
+          <div><div class="compare-col-header col-antho">✦ Antho · Opus</div><div class="compare-col-body">
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-antho-s7-h1 --></div><div class="cmp-summary"><!-- cmp-antho-s7-s1 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-antho-s7-h2 --></div><div class="cmp-summary"><!-- cmp-antho-s7-s2 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-antho-s7-h3 --></div><div class="cmp-summary"><!-- cmp-antho-s7-s3 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-antho-s7-h4 --></div><div class="cmp-summary"><!-- cmp-antho-s7-s4 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-antho-s7-h5 --></div><div class="cmp-summary"><!-- cmp-antho-s7-s5 --></div></div>
+          </div></div>
+          <div><div class="compare-col-header col-chatty">💬 Chatty · GPT-4o</div><div class="compare-col-body">
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-chatty-s7-h1 --></div><div class="cmp-summary"><!-- cmp-chatty-s7-s1 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-chatty-s7-h2 --></div><div class="cmp-summary"><!-- cmp-chatty-s7-s2 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-chatty-s7-h3 --></div><div class="cmp-summary"><!-- cmp-chatty-s7-s3 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-chatty-s7-h4 --></div><div class="cmp-summary"><!-- cmp-chatty-s7-s4 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-chatty-s7-h5 --></div><div class="cmp-summary"><!-- cmp-chatty-s7-s5 --></div></div>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- Compare: World (s8) -->
+      <div class="cmp-section" id="cmp-world" style="display:none">
+        <div class="compare-grid">
+          <div><div class="compare-col-header col-gemi">♊ Gemi · Gemini</div><div class="compare-col-body">
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-gemi-s8-h1 --></div><div class="cmp-summary"><!-- cmp-gemi-s8-s1 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-gemi-s8-h2 --></div><div class="cmp-summary"><!-- cmp-gemi-s8-s2 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-gemi-s8-h3 --></div><div class="cmp-summary"><!-- cmp-gemi-s8-s3 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-gemi-s8-h4 --></div><div class="cmp-summary"><!-- cmp-gemi-s8-s4 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-gemi-s8-h5 --></div><div class="cmp-summary"><!-- cmp-gemi-s8-s5 --></div></div>
+          </div></div>
+          <div><div class="compare-col-header col-antho">✦ Antho · Opus</div><div class="compare-col-body">
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-antho-s8-h1 --></div><div class="cmp-summary"><!-- cmp-antho-s8-s1 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-antho-s8-h2 --></div><div class="cmp-summary"><!-- cmp-antho-s8-s2 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-antho-s8-h3 --></div><div class="cmp-summary"><!-- cmp-antho-s8-s3 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-antho-s8-h4 --></div><div class="cmp-summary"><!-- cmp-antho-s8-s4 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-antho-s8-h5 --></div><div class="cmp-summary"><!-- cmp-antho-s8-s5 --></div></div>
+          </div></div>
+          <div><div class="compare-col-header col-chatty">💬 Chatty · GPT-4o</div><div class="compare-col-body">
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-chatty-s8-h1 --></div><div class="cmp-summary"><!-- cmp-chatty-s8-s1 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-chatty-s8-h2 --></div><div class="cmp-summary"><!-- cmp-chatty-s8-s2 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-chatty-s8-h3 --></div><div class="cmp-summary"><!-- cmp-chatty-s8-s3 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-chatty-s8-h4 --></div><div class="cmp-summary"><!-- cmp-chatty-s8-s4 --></div></div>
+            <div class="cmp-item"><div class="cmp-headline"><!-- cmp-chatty-s8-h5 --></div><div class="cmp-summary"><!-- cmp-chatty-s8-s5 --></div></div>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- Compare: LinkedIn -->
+      <div class="cmp-section" id="cmp-li" style="display:none">
+        <div class="placeholder-block">LinkedIn comparison view — shows all 6 posts (2 per agent) side by side.<br>Architectural posts in one row, Flashy posts in another.</div>
+      </div>
+
+    </div><!-- /compare-panel -->
+
+  </main>
+</div>
+
+<script>
+let currentAgent = 'gemi';
+let compareMode = false;
+
+function switchAgent(agent) {
+  if (compareMode) { toggleCompare(); }
+  currentAgent = agent;
+  document.querySelectorAll('.agent-panel').forEach(p => p.classList.remove('visible'));
+  document.getElementById('panel-' + agent).classList.add('visible');
+  document.querySelectorAll('.agent-tab').forEach(t => t.classList.remove('active-gemi','active-antho','active-chatty'));
+  document.getElementById('tab-' + agent).classList.add('active-' + agent);
+  const colors = {
+    gemi:  ['var(--gemi)',  'var(--gemi-dim)',  'var(--gemi-mid)'],
+    antho: ['var(--antho)', 'var(--antho-dim)', 'var(--antho-mid)'],
+    chatty:['var(--chatty)','var(--chatty-dim)','var(--chatty-mid)'],
+  };
+  document.documentElement.style.setProperty('--active-color', colors[agent][0]);
+  document.documentElement.style.setProperty('--active-dim',   colors[agent][1]);
+  document.documentElement.style.setProperty('--active-mid',   colors[agent][2]);
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const first = document.querySelector('.nav-item');
+  if (first) first.classList.add('active');
+  closeMobileNav();
+}
+
+function toggleCompare() {
+  compareMode = !compareMode;
+  const btn = document.getElementById('compare-btn');
+  const panel = document.getElementById('compare-panel');
+  if (compareMode) {
+    btn.classList.add('on');
+    document.querySelectorAll('.agent-panel').forEach(p => p.classList.remove('visible'));
+    document.querySelectorAll('.agent-tab').forEach(t => t.classList.remove('active-gemi','active-antho','active-chatty'));
+    panel.classList.add('visible');
+  } else {
+    btn.classList.remove('on');
+    panel.classList.remove('visible');
+    switchAgent(currentAgent);
+  }
+}
+
+function cmpSection(el, targetId) {
+  document.querySelectorAll('.cmp-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.cmp-section').forEach(s => s.style.display = 'none');
+  document.getElementById(targetId).style.display = 'block';
+}
+
+function navClick(el) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  el.classList.add('active');
+  closeMobileNav();
+}
+
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const id = e.target.id;
+      document.querySelectorAll('.nav-item').forEach(n => {
+        n.classList.toggle('active', n.getAttribute('href') === '#' + id);
+      });
+    }
+  });
+}, { threshold: 0.25, rootMargin: '-64px 0px -50% 0px' });
+document.querySelectorAll('.section-block[id]').forEach(s => obs.observe(s));
+
+function toggleMobileNav() {
+  document.getElementById('section-nav').classList.toggle('mobile-open');
+  document.getElementById('nav-overlay').classList.toggle('visible');
+}
+function closeMobileNav() {
+  document.getElementById('section-nav').classList.remove('mobile-open');
+  document.getElementById('nav-overlay').classList.remove('visible');
+}
+</script>
+</body>
+</html>

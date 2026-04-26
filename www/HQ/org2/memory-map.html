@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Architecture Map | ORg 2</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #050505;
+            color: #e2e8f0;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 4rem 2rem;
+        }
+
+        .org-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+            position: relative;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        /* Connecting Lines */
+        .line-v { width: 1px; background: rgba(255, 255, 255, 0.1); height: 2rem; }
+        .line-h-container { width: 100%; display: flex; justify-content: center; position: relative; }
+        .line-h { height: 1px; background: rgba(255, 255, 255, 0.1); position: absolute; top: 0; }
+
+        .card {
+            background: #111;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1.5rem;
+            width: 480px;
+            position: relative;
+        }
+
+        .card-small { width: 350px; }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            margin-right: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .dep-list {
+            margin-top: 1rem;
+            font-size: 0.75rem;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding-top: 1rem;
+        }
+
+        .dep-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .dep-icon { width: 16px; text-align: center; flex-shrink: 0; }
+        .dep-label { color: #475569; text-transform: uppercase; font-size: 0.6rem; letter-spacing: 0.05em; width: 50px; flex-shrink: 0; }
+        .dep-value { color: #94a3b8; }
+
+        .tag-read { color: #60a5fa; }
+        .tag-write { color: #10b981; }
+        .tag-dep { color: #fbbf24; }
+
+        .row { display: flex; gap: 2rem; justify-content: center; position: relative; flex-wrap: wrap; }
+
+        .back-link {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            color: #475569;
+            text-decoration: none;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+            z-index: 50;
+        }
+        .back-link:hover { opacity: 1; }
+
+        .legend {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: #111;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.7rem;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="index.html" class="back-link">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        Back to Dashboard
+    </a>
+
+    <div class="org-container">
+        <h1 class="text-2xl font-bold mb-8 text-slate-400">MEMORY ARCHITECTURE MAP</h1>
+
+        <!-- Level 1: Alpha & Guardian -->
+        <div class="row items-start">
+            <!-- Guardian -->
+            <div class="card card-small border-amber-500/20">
+                <div class="flex items-center mb-4">
+                    <div class="avatar">🛡️</div>
+                    <h2 class="text-md font-bold">Guardian</h2>
+                </div>
+                <div class="dep-list">
+                    <div class="dep-item">
+                        <span class="dep-icon">📄</span>
+                        <span class="dep-label tag-read">READ</span>
+                        <span class="dep-value">SOUL.md, Alpha Transcript</span>
+                    </div>
+                    <div class="dep-item">
+                        <span class="dep-icon">✍️</span>
+                        <span class="dep-label tag-write">WRITE</span>
+                        <span class="dep-value">None (Stateless)</span>
+                    </div>
+                    <div class="dep-item">
+                        <span class="dep-icon">⚠️</span>
+                        <span class="dep-label tag-dep">DEP</span>
+                        <span class="dep-value">Real-time access to Alpha session</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alpha -->
+            <div class="card border-blue-500/20">
+                <div class="flex items-center mb-4">
+                    <div class="avatar">🏛️</div>
+                    <h2 class="text-lg font-bold">Alpha</h2>
+                </div>
+                <div class="dep-list">
+                    <div class="dep-item">
+                        <span class="dep-icon">📄</span>
+                        <span class="dep-label tag-read">READ</span>
+                        <span class="dep-value">SOUL.md, AGENTS.md, USER.md, TOOLS.md, MEMORY.md, memory/YYYY-MM-DD.md</span>
+                    </div>
+                    <div class="dep-item">
+                        <span class="dep-icon">🗄️</span>
+                        <span class="dep-label tag-read">READ</span>
+                        <span class="dep-value">chiefos.db (Audit, Intel, Chronicles)</span>
+                    </div>
+                    <div class="dep-item">
+                        <span class="dep-icon">✍️</span>
+                        <span class="dep-label tag-write">WRITE</span>
+                        <span class="dep-value">memory/YYYY-MM-DD.md, MEMORY.md, chiefos.db</span>
+                    </div>
+                    <div class="dep-item">
+                        <span class="dep-icon">⚠️</span>
+                        <span class="dep-label tag-dep">DEP</span>
+                        <span class="dep-value">Full Workspace Context, SQLite</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="line-v"></div>
+
+        <!-- Level 2: JS, Super, Agent-D -->
+        <div class="row">
+            <!-- JS -->
+            <div class="card card-small border-purple-500/10">
+                <div class="flex items-center mb-4">
+                    <div class="avatar">💻</div>
+                    <h2 class="text-md font-bold">JS</h2>
+                </div>
+                <div class="dep-list">
+                    <div class="dep-item">
+                        <span class="dep-icon">📄</span>
+                        <span class="dep-label tag-read">READ</span>
+                        <span class="dep-value">AGENTS.md, Source Code</span>
+                    </div>
+                    <div class="dep-item">
+                        <span class="dep-icon">✍️</span>
+                        <span class="dep-label tag-write">WRITE</span>
+                        <span class="dep-value">Scripts, www/HQ Pages, Project Files</span>
+                    </div>
+                    <div class="dep-item">
+                        <span class="dep-icon">⚠️</span>
+                        <span class="dep-label tag-dep">DEP</span>
+                        <span class="dep-value">Shell Execution, File System Access</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Super -->
+            <div class="card card-small border-orange-500/10">
+                <div class="flex items-center mb-4">
+                    <div class="avatar">🏠</div>
+                    <h2 class="text-md font-bold">Super</h2>
+                </div>
+                <div class="dep-list">
+                    <div class="dep-item">
+                        <span class="dep-icon">📄</span>
+                        <span class="dep-label tag-read">READ</span>
+                        <span class="dep-value">AGENTS.md, USER.md, Property Context</span>
+                    </div>
+                    <div class="dep-item">
+                        <span class="dep-icon">🗄️</span>
+                        <span class="dep-label tag-read">READ</span>
+                        <span class="dep-value">chiefos.db (Asset_Registry, Utilities)</span>
+                    </div>
+                    <div class="dep-item">
+                        <span class="dep-icon">✍️</span>
+                        <span class="dep-label tag-write">WRITE</span>
+                        <span class="dep-value">Maintenance Logs, Property Records</span>
+                    </div>
+                    <div class="dep-item">
+                        <span class="dep-icon">⚠️</span>
+                        <span class="dep-label tag-dep">DEP</span>
+                        <span class="dep-value">Property Database, Vendor Info</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Agent-D -->
+            <div class="card card-small border-emerald-500/10">
+                <div class="flex items-center mb-4">
+                    <div class="avatar">📊</div>
+                    <h2 class="text-md font-bold">Agent-D</h2>
+                </div>
+                <div class="dep-list">
+                    <div class="dep-item">
+                        <span class="dep-icon">📄</span>
+                        <span class="dep-label tag-read">READ</span>
+                        <span class="dep-value">AGENTS.md, USER.md, Financials</span>
+                    </div>
+                    <div class="dep-item">
+                        <span class="dep-icon">🗄️</span>
+                        <span class="dep-label tag-read">READ</span>
+                        <span class="dep-value">chiefos.db (Financial_Ledger, Usage)</span>
+                    </div>
+                    <div class="dep-item">
+                        <span class="dep-icon">✍️</span>
+                        <span class="dep-label tag-write">WRITE</span>
+                        <span class="dep-value">Expense Logs, Invoice Records</span>
+                    </div>
+                    <div class="dep-item">
+                        <span class="dep-icon">⚠️</span>
+                        <span class="dep-label tag-dep">DEP</span>
+                        <span class="dep-value">Financial Database, Ledger History</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="legend">
+        <div class="flex items-center gap-2 mb-1"><span class="tag-read">●</span> Reads</div>
+        <div class="flex items-center gap-2 mb-1"><span class="tag-write">●</span> Writes</div>
+        <div class="flex items-center gap-2"><span class="tag-dep">●</span> Dependencies</div>
+    </div>
+</body>
+</html>

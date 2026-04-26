@@ -1,0 +1,21 @@
+id: js
+name: JS
+role: Coding & Development
+emoji: "⌨️"
+model: anthropic/claude-opus-4-5
+status: on-demand
+tier: specialist
+reports_to: main
+workspace: $CHIEFOS_HOME/agents/js
+capabilities:
+  - Script writing and debugging
+  - Feature implementation
+  - Technical architecture
+  - Code review and refactoring
+  - API integration
+channels: []
+notes: >
+  Uses Opus for strong reasoning on complex code tasks.
+  Activated by Alpha when coding work is identified.
+  Delegation pattern: Alpha routes via sessions_send,
+  JS executes independently and reports back.
