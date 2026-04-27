@@ -67,7 +67,7 @@ Your AI Agent (any model)
         │
         ▼
     ChiefOS HQ
-        ├── www/HQ/          ← 8 live dashboards
+        ├── www/HQ/          ← 10 live dashboards
         ├── scripts/core/    ← hydrators, add_todo.py
         ├── scripts/alerts/  ← 8 scheduled alert scripts
         └── scripts/utils/   ← email, security, monitoring
@@ -87,8 +87,10 @@ Your AI Agent (any model)
 | Briefing | `/HQ/briefing/` | Daily intelligence brief |
 | Finance | `/HQ/finance/` | Transactions, bills, subscriptions |
 | Property | `/HQ/property/` | Asset status, maintenance, cleaning |
-| Schedule | `/HQ/schedule/` | Todos and events calendar |
+| Schedule | `/HQ/schedule/` | Todos and events; travel shows location + notes |
 | Content | `/HQ/posts/` | Social posts and content pipeline |
+| Projects | `/HQ/projects/` | Active projects, tasks, overdue tracking |
+| Comms | `/HQ/comms/` | Contacts directory with star ratings |
 | Security | `/HQ/security/` | Network events and perimeter logs |
 | Weekly | `/HQ/weekly_layout/` | Weekly rhythm visualization |
 

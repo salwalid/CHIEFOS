@@ -87,8 +87,8 @@ Active initiatives and their work items. Projects contain tasks; tasks link to t
 
 ## Domain 7 — Communications
 
-**Dashboard:** *(planned)*
-**Powered by:** `check_emails.py`, `morning_email_review.py`
+**Dashboard:** `/HQ/comms/`
+**Powered by:** `hydrate_comms.py`, `check_emails.py`, `morning_email_review.py`
 **Alerts:** `morning_email_review.py` (5am daily)
 
 Email monitoring and communications tracking. `check_emails.py` runs every 30 minutes to check for new messages and log them. `morning_email_review.py` sends a daily digest of overnight emails — counts, senders, anything flagged urgent.
@@ -125,7 +125,7 @@ Strategic concepts, breakthroughs, and domain knowledge. When your agent learns 
 **Dashboard:** shown on Schedule (`/HQ/schedule/`)
 **Powered by:** `hydrate_schedule.py`
 
-Travel plans, meetings, deadlines, and important dates. Stored in `events` and rendered on the Schedule calendar alongside todos. Travel domain is handled directly by the COS Agent (no dedicated sub-agent).
+Travel plans, meetings, deadlines, and important dates. Stored in `events` and rendered on the Schedule calendar alongside todos. Travel events display a detail line with 📍 location and notes directly beneath the event tag. Travel domain is handled directly by the COS Agent (no dedicated sub-agent).
 
 **Tables:** `events`
 
