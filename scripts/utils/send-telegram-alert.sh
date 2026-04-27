@@ -12,7 +12,7 @@ if [ ! -f "$MESSAGE_FILE" ]; then
 fi
 
 MESSAGE=$(cat "$MESSAGE_FILE")
-TELEGRAM_USER_ID="REDACTED_TELEGRAM_USER_ID"  # User's Telegram ID
+TELEGRAM_USER_ID="${TELEGRAM_CHAT_ID}"  # Set TELEGRAM_CHAT_ID in config.env
 
 # Send via ChiefOS CLI
 PATH=$CHIEFOS_HOME/.local/share/pnpm:$PATH /usr/bin/chiefos message send \

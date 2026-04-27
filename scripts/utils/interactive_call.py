@@ -11,9 +11,9 @@ from twilio.rest import Client
 from twilio.twiml.voice_response import VoiceResponse, Connect, Stream
 
 # Twilio credentials
-TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID", "REDACTED_TWILIO_ACCOUNT_SID")
-TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "REDACTED_TWILIO_AUTH_TOKEN")
-TWILIO_FROM_NUMBER = os.getenv("TWILIO_FROM_NUMBER", "REDACTED_TWILIO_FROM_NUMBER")
+TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
+TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
+TWILIO_FROM_NUMBER = os.getenv("TWILIO_FROM_NUMBER")
 
 # WebSocket server configuration
 WEBSOCKET_URL = os.getenv("WEBSOCKET_URL", "wss://your-vps-ip:18793/media-stream")

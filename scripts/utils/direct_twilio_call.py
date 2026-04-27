@@ -5,14 +5,28 @@ Makes a phone call using Twilio with TTS message delivery.
 """
 
 import argparse
+import os
 import sys
+from pathlib import Path
 from twilio.rest import Client
 from twilio.twiml.voice_response import VoiceResponse
 
-# Twilio credentials
-TWILIO_ACCOUNT_SID = "REDACTED_TWILIO_ACCOUNT_SID"
-TWILIO_AUTH_TOKEN = "REDACTED_TWILIO_AUTH_TOKEN"
-TWILIO_FROM_NUMBER = "REDACTED_TWILIO_FROM_NUMBER"
+
+def load_env():
+    env_path = Path(__file__).parent / '.env'
+    if env_path.exists():
+        with open(env_path) as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith('#') and '=' in line:
+                    key, _, value = line.partition('=')
+                    os.environ.setdefault(key.strip(), value.strip())
+
+load_env()
+
+TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
+TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
+TWILIO_FROM_NUMBER = os.getenv("TWILIO_FROM_NUMBER")
 
 
 def generate_twiml(message):
