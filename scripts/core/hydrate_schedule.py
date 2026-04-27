@@ -3,9 +3,9 @@ import json
 import sqlite3
 from datetime import datetime, date
 
-BASE_DIR = os.environ.get("BASE_DIR", "/home/chiefos/chiefos")
+BASE_DIR = "$CHIEFOS_HOME"
 SCHEDULE_JSON = os.path.join(BASE_DIR, "www/HQ/schedule/schedule_data.json")
-DB_PATH = os.path.join(BASE_DIR, os.environ.get("DB_NAME", "chiefos.db"))
+DB_PATH = os.path.join(BASE_DIR, "chiefos.db")
 
 # Map todo category → CSS tag type
 CATEGORY_TO_TYPE = {
@@ -69,18 +69,23 @@ def hydrate_schedule():
 
     # --- Source 3: events table (travel, meetings, etc.) ---
     cursor.execute("""
-        SELECT title, type, start_datetime
+        SELECT title, type, start_datetime, end_datetime, location, notes
         FROM events
         WHERE start_datetime IS NOT NULL
           AND start_datetime != ''
         ORDER BY start_datetime ASC
     """)
     for row in cursor.fetchall():
-        events.append({
-            "date":  row["start_datetime"][:10],
-            "title": row["title"],
-            "type":  row["type"] if row["type"] else "admin"
-        })
+        loc = (row["location"] or "").strip()
+        evt = {
+            "date":     row["start_datetime"][:10],
+            "title":    row["title"],
+            "type":     row["type"] if row["type"] else "admin",
+            "end_date": row["end_datetime"][:10] if row["end_datetime"] else None,
+            "location": loc if loc and loc.lower() != "n/a" else None,
+            "notes":    row["notes"] if row["notes"] else None,
+        }
+        events.append(evt)
 
     conn.close()
 

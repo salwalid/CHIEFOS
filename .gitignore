@@ -8,6 +8,10 @@ config.env
 *.env
 !config.env.template
 
+# ---- Runtime instance config (contains personal data) ----
+www/HQ/mission-control/mission-control.json
+www/HQ/mission-control/files.zip
+
 # ---- Database (contains personal data) ----
 *.db
 *.db-shm

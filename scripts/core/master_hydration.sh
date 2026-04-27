@@ -41,6 +41,10 @@ echo "Weekly Layout: SYNCED" >> "$LOG_FILE"
 python3 "$BASE_DIR/scripts/hydrate_projects.py" >> "$LOG_FILE" 2>&1
 echo "Projects: SYNCED" >> "$LOG_FILE"
 
-# 9. Agent Office — runs as persistent daemon via @reboot cron, not called here
+# 9. Update Comms Directory
+python3 "$BASE_DIR/scripts/hydrate_comms.py" >> "$LOG_FILE" 2>&1
+echo "Comms: SYNCED" >> "$LOG_FILE"
+
+# 10. Agent Office — runs as persistent daemon via @reboot cron, not called here
 
 echo "[$(date)] --- HYDRATION PULSE COMPLETE ---" >> "$LOG_FILE"

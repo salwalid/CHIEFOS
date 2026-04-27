@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projects | Alpha HQ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #0f172a; color: #f8fafc; font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        .card { background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.05); border-radius: 1.5rem; padding: 1.5rem; }
+        .stat-card { background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.07); border-radius: 1.25rem; padding: 1.25rem 1.5rem; }
+        .section-title { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #64748b; margin-bottom: 0.75rem; }
+        .project-card { background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255,255,255,0.06); border-radius: 1rem; padding: 1rem 1.25rem; transition: border-color 0.2s; }
+        .project-card:hover { border-color: rgba(255,255,255,0.15); }
+        .badge { font-size: 0.6rem; padding: 2px 8px; border-radius: 4px; font-weight: 700; text-transform: uppercase; }
+        .badge-active { background: rgba(16,185,129,0.15); color: #10b981; }
+        .badge-proposed { background: rgba(245,158,11,0.15); color: #f59e0b; }
+        .badge-done { background: rgba(100,116,139,0.2); color: #64748b; }
+        .task-row { font-size: 0.75rem; color: #94a3b8; padding: 0.25rem 0; border-top: 1px solid rgba(255,255,255,0.04); display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; }
+        .priority-high { color: #ef4444; }
+        .priority-medium { color: #f59e0b; }
+        .priority-low { color: #64748b; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+    </style>
+</head>
+<body class="min-h-screen p-6">
+
+    <div class="max-w-7xl mx-auto mb-8 flex justify-between items-center">
+        <a href="/HQ/" class="text-sky-400 flex items-center hover:text-sky-300 transition text-sm">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Mission Control
+        </a>
+        <h1 class="text-xl font-bold tracking-tight text-white">Projects</h1>
+        <div class="text-slate-500 text-xs font-mono" id="syncTime">Loading...</div>
+    </div>
+
+    <div class="max-w-7xl mx-auto space-y-8">
+
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="stat-card">
+                <div class="section-title">Total Projects</div>
+                <div class="text-2xl font-black text-white" id="statTotal">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="section-title">Active</div>
+                <div class="text-2xl font-black text-emerald-400" id="statActive">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="section-title">Open Tasks</div>
+                <div class="text-2xl font-black text-sky-400" id="statTasks">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="section-title">Overdue Tasks</div>
+                <div class="text-2xl font-black text-red-400" id="statOverdue">—</div>
+            </div>
+        </div>
+
+        <!-- Active Projects -->
+        <div>
+            <div class="section-title mb-3">Active Projects</div>
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" id="activeList"></div>
+        </div>
+
+        <!-- Proposed Projects -->
+        <div id="proposedSection" style="display:none">
+            <div class="section-title mb-3">Proposed</div>
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" id="proposedList"></div>
+        </div>
+
+        <!-- Completed Projects -->
+        <div id="doneSection" style="display:none">
+            <div class="section-title mb-3">Completed</div>
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" id="doneList"></div>
+        </div>
+
+        <!-- Unlinked Tasks -->
+        <div id="orphanSection" style="display:none">
+            <div class="section-title mb-3">Unlinked Tasks</div>
+            <div class="card" id="orphanList"></div>
+        </div>
+
+    </div>
+
+    <script>
+        function badgeClass(status) {
+            const s = (status || '').toLowerCase();
+            if (s === 'active') return 'badge-active';
+            if (s === 'proposed') return 'badge-proposed';
+            if (s === 'done' || s === 'complete' || s === 'completed') return 'badge-done';
+            return 'badge-proposed';
+        }
+
+        function priorityClass(p) {
+            if ((p || '').toLowerCase() === 'high') return 'priority-high';
+            if ((p || '').toLowerCase() === 'medium') return 'priority-medium';
+            return 'priority-low';
+        }
+
+        function buildCard(p, tasksByProject) {
+            const tasks = tasksByProject[String(p.id)] || [];
+            const openTasks = tasks.filter(t => (t.status || 'open') === 'open');
+            const taskHtml = tasks.length === 0
+                ? '<p class="text-xs text-slate-600 mt-2">No tasks linked</p>'
+                : tasks.map(t => `
+                    <div class="task-row">
+                        <span class="${t.status === 'done' ? 'line-through text-slate-600' : ''}">${t.title}</span>
+                        <span class="${priorityClass(t.priority)} text-[10px] font-bold uppercase">${t.priority || ''}</span>
+                    </div>`).join('');
+
+            const desc = p.description ? `<p class="text-xs text-slate-500 mt-1 mb-2">${p.description}</p>` : '';
+            const taskCount = tasks.length > 0
+                ? `<span class="text-xs text-slate-500">${openTasks.length} open · ${tasks.length} total</span>`
+                : '';
+
+            return `
+                <div class="project-card">
+                    <div class="flex items-start justify-between gap-2 mb-1">
+                        <span class="text-sm font-semibold text-white leading-tight">${p.project_name}</span>
+                        <span class="badge ${badgeClass(p.status)} shrink-0">${p.status || 'active'}</span>
+                    </div>
+                    ${desc}
+                    ${taskCount}
+                    <div class="mt-2">${taskHtml}</div>
+                </div>`;
+        }
+
+        function render(data) {
+            document.getElementById('syncTime').textContent = 'Synced ' + data.sync_time;
+            const s = data.summary;
+            document.getElementById('statTotal').textContent = s.total_projects;
+            document.getElementById('statActive').textContent = s.active_projects;
+            document.getElementById('statTasks').textContent = s.open_tasks;
+            document.getElementById('statOverdue').textContent = s.overdue_tasks;
+
+            const active = data.projects.filter(p => (p.status || '').toLowerCase() === 'active');
+            const proposed = data.projects.filter(p => (p.status || '').toLowerCase() === 'proposed');
+            const done = data.projects.filter(p => ['done','complete','completed'].includes((p.status || '').toLowerCase()));
+
+            document.getElementById('activeList').innerHTML = active.map(p => buildCard(p, data.tasks_by_project)).join('');
+
+            if (proposed.length) {
+                document.getElementById('proposedSection').style.display = '';
+                document.getElementById('proposedList').innerHTML = proposed.map(p => buildCard(p, data.tasks_by_project)).join('');
+            }
+            if (done.length) {
+                document.getElementById('doneSection').style.display = '';
+                document.getElementById('doneList').innerHTML = done.map(p => buildCard(p, data.tasks_by_project)).join('');
+            }
+
+            if (data.orphaned_tasks && data.orphaned_tasks.length) {
+                document.getElementById('orphanSection').style.display = '';
+                document.getElementById('orphanList').innerHTML = data.orphaned_tasks.map(t => `
+                    <div class="task-row">
+                        <span>${t.title}</span>
+                        <span class="${priorityClass(t.priority)} text-[10px] font-bold uppercase">${t.priority || ''}</span>
+                    </div>`).join('');
+            }
+        }
+
+        function load() {
+            fetch('/HQ/projects/projects_data.json?t=' + Date.now())
+                .then(r => r.json())
+                .then(render)
+                .catch(() => { document.getElementById('syncTime').textContent = 'Sync failed'; });
+        }
+
+        load();
+        setInterval(load, 60000);
+    </script>
+
+</body>
+</html>

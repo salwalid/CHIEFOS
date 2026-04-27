@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comms | Alpha HQ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #0f172a; color: #f8fafc; font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        .stat-card { background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.07); border-radius: 1.25rem; padding: 1.25rem 1.5rem; }
+        .section-title { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #64748b; margin-bottom: 0.75rem; }
+        .contact-card { background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255,255,255,0.06); border-radius: 1rem; padding: 1.1rem 1.25rem; transition: border-color 0.2s; }
+        .contact-card:hover { border-color: rgba(255,255,255,0.15); }
+        .stars { color: #f59e0b; letter-spacing: -0.05em; font-size: 0.75rem; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+    </style>
+</head>
+<body class="min-h-screen p-6">
+
+    <div class="max-w-7xl mx-auto mb-8 flex justify-between items-center">
+        <a href="/HQ/" class="text-sky-400 flex items-center hover:text-sky-300 transition text-sm">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Mission Control
+        </a>
+        <h1 class="text-xl font-bold tracking-tight text-white">Comms & Contacts</h1>
+        <div class="text-slate-500 text-xs font-mono" id="syncTime">Loading...</div>
+    </div>
+
+    <div class="max-w-7xl mx-auto space-y-8">
+
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div class="stat-card">
+                <div class="section-title">Total Contacts</div>
+                <div class="text-2xl font-black text-white" id="statTotal">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="section-title">Rated</div>
+                <div class="text-2xl font-black text-amber-400" id="statRated">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="section-title">Avg Rating</div>
+                <div class="text-2xl font-black text-amber-400" id="statAvg">—</div>
+            </div>
+        </div>
+
+        <!-- Contact Grid -->
+        <div>
+            <div class="section-title mb-3">Directory</div>
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" id="contactGrid"></div>
+        </div>
+
+    </div>
+
+    <script>
+        function stars(rating) {
+            if (!rating) return '';
+            const filled = Math.round(rating);
+            return '★'.repeat(filled) + '☆'.repeat(5 - filled);
+        }
+
+        function buildCard(c) {
+            const lastUsed = c.last_used
+                ? `<span class="text-xs text-slate-600">Last: ${c.last_used}</span>`
+                : '';
+            const rating = c.rating
+                ? `<span class="stars">${stars(c.rating)}</span>`
+                : '';
+            const info = (c.contact_info || '').split('|').map(s => s.trim()).filter(Boolean);
+            const infoHtml = info.map(line => `<div class="text-xs text-slate-400 truncate">${line}</div>`).join('');
+
+            return `
+                <div class="contact-card">
+                    <div class="flex items-start justify-between gap-2 mb-1">
+                        <span class="text-sm font-semibold text-white leading-tight">${c.name || '—'}</span>
+                        ${rating}
+                    </div>
+                    <div class="text-xs text-sky-400 mb-2">${c.specialty || ''}</div>
+                    <div class="space-y-0.5 mb-2">${infoHtml}</div>
+                    ${lastUsed}
+                </div>`;
+        }
+
+        function render(data) {
+            document.getElementById('syncTime').textContent = 'Synced ' + data.sync_time;
+            const s = data.summary;
+            document.getElementById('statTotal').textContent = s.total_contacts;
+            document.getElementById('statRated').textContent = s.rated_contacts;
+            document.getElementById('statAvg').textContent = s.avg_rating ? s.avg_rating + ' / 5' : '—';
+            document.getElementById('contactGrid').innerHTML = data.contacts.map(buildCard).join('');
+        }
+
+        function load() {
+            fetch('/HQ/comms/comms_data.json?t=' + Date.now())
+                .then(r => r.json())
+                .then(render)
+                .catch(() => { document.getElementById('syncTime').textContent = 'Sync failed'; });
+        }
+
+        load();
+        setInterval(load, 60000);
+    </script>
+
+</body>
+</html>

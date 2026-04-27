@@ -8,8 +8,8 @@ import json
 import sqlite3
 from datetime import datetime, date
 
-BASE_DIR = os.environ.get("BASE_DIR", "/home/chiefos/chiefos")
-DB_PATH = os.path.join(BASE_DIR, os.environ.get("DB_NAME", "chiefos.db"))
+BASE_DIR = "$CHIEFOS_HOME"
+DB_PATH = os.path.join(BASE_DIR, "chiefos.db")
 OUTPUT = os.path.join(BASE_DIR, "www/HQ/projects/projects_data.json")
 
 def run():
@@ -44,7 +44,7 @@ def run():
         "sync_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "summary": {
             "total_projects": len(projects),
-            "active_projects": sum(1 for p in projects if (p.get('status') or '') == 'Active'),
+            "active_projects": sum(1 for p in projects if (p.get('status') or '').lower() == 'active'),
             "total_tasks": total_tasks,
             "open_tasks": open_tasks,
             "overdue_tasks": overdue
