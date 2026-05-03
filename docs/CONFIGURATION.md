@@ -98,6 +98,40 @@ The agent writes on the server; you read and explore in Obsidian on your local m
 
 ---
 
+## Alerting Tunables (Optional)
+
+Used by `scripts/alerts/todo_alert.py` and `scripts/alerts/lead_up_checks.py`. All have safe defaults — set only the values you want to override.
+
+| Variable | Default | Description |
+|---|---|---|
+| `HORIZON_DAYS` | `5` | How many days ahead the morning briefing's Horizon block looks. |
+| `CAP_OVERDUE` | `5` | Max items shown in the Overdue block. Excess collapses to "+N more → dashboard". |
+| `CAP_TODAY` | `10` | Max items shown in the Today block. |
+| `CAP_HORIZON` | `8` | Max items shown in the Horizon block. |
+| `LEAD_UP_DAYS` | `3,1` | Days-before-due that trigger targeted lead-up pings. CSV. |
+| `LEAD_UP_PRIORITIES` | `high` | Priority values that qualify for lead-up pings. CSV. |
+
+### Recommended cron entries
+
+```cron
+# Morning Daily Briefing — Overdue + Today + Horizon
+30 5 * * * cd /path/to/chiefos/scripts/alerts && python3 todo_alert.py
+
+# Lead-up deadline checks — T-3 and T-1 pings for high-priority items
+0 9 * * * cd /path/to/chiefos/scripts/alerts && python3 lead_up_checks.py
+
+# Midday pulse — Today bucket only, silent if empty
+0 14 * * * cd /path/to/chiefos/scripts/alerts && python3 todo_alert.py --block today --only-if-nonempty
+```
+
+To preview output without sending Telegram:
+```bash
+python3 todo_alert.py --dry-run
+python3 lead_up_checks.py --dry-run
+```
+
+---
+
 ## Twilio (Optional)
 
 Only required if you want to use `make-call.sh` for phone call alerts.
