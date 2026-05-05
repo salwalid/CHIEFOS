@@ -4,7 +4,7 @@ import time
 from datetime import datetime
 
 # Path configuration
-BASE_AGENTS_DIR = "$CHIEFOS_HOME/.chiefos/agents/"
+BASE_AGENTS_DIR = "$CHIEFOS_HOME/.config/agents/"
 AGENT_PATHS = {
     "alpha": os.path.join(BASE_AGENTS_DIR, "main/sessions/"),
     "js": os.path.join(BASE_AGENTS_DIR, "js/sessions/"),

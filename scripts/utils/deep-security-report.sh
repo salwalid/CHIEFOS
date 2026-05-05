@@ -1,7 +1,7 @@
 #!/bin/bash
 # deep-security-report.sh — Comprehensive security report (Tier 2)
 # Runs as ROOT via root's crontab
-# Frequency: Mon/Wed/Fri at 9am your city time (14:00 UTC)
+# Frequency: Mon/Wed/Fri at 9am local time
 
 set -euo pipefail
 

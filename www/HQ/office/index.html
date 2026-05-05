@@ -396,7 +396,7 @@
         .book:nth-child(2n) { background: #2980b9; height: 14px; }
         .book:nth-child(3n) { background: #f1c40f; height: 10px; }
 
-        /* your city Gallery */
+        /* City Gallery */
         .gallery-frame {
             position: absolute;
             width: 32px;
@@ -626,7 +626,7 @@
                 <div class="isometric-floor"></div>
                 <div class="rug"></div>
 
-                <!-- your city Gallery -->
+                <!-- City Gallery -->
                 <div class="gallery-frame" style="left: 10%; top: 15%;">🚃</div>
                 <div class="gallery-frame" style="left: 20%; top: 12%;">🍁</div>
                 <div class="gallery-frame" style="left: 30%; top: 15%;">🏙️</div>
@@ -751,15 +751,15 @@
             return '💬';
         }
 
-        function updateyour cityCycle() {
+        function updateCityCycle() {
             const now = new Date();
-            const torontoTime = new Intl.DateTimeFormat('en-US', {
+            const localTime = new Intl.DateTimeFormat('en-US', {
                 timeZone: '$TZ',
                 hour: 'numeric',
                 hour12: false
             }).format(now);
             
-            const hour = parseInt(torontoTime);
+            const hour = parseInt(localTime);
             const root = document.documentElement;
             const workspace = document.getElementById('workspace');
 
@@ -826,9 +826,9 @@
                 const response = await fetch('agent_data.json?t=' + Date.now());
                 const data = await response.json();
                 
-                updateyour cityCycle();
+                updateCityCycle();
                 updateChaosCat(data.agents);
-                // Simple weather detection from activity or hardcoded for now based on your city search
+                // Simple weather detection from activity or hardcoded for now based on city search
                 updateWeather('flurries'); 
 
                 const agentsLayer = document.getElementById('agents-layer');

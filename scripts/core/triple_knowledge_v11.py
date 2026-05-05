@@ -63,7 +63,7 @@ ENGINES = [
         "provider": "google",
         "model": "gemini-2.0-flash",
         "env_key": "GOOGLE_GEMINI_API_KEY",
-        "info_template": "Gemini 2.0 Flash · Google · {date} · {time} your city",
+        "info_template": "Gemini 2.0 Flash · Google · {date} · {time} {city}",
     },
     {
         "key": "antho",
@@ -71,7 +71,7 @@ ENGINES = [
         "provider": "anthropic",
         "model": "claude-sonnet-4-20250514",
         "env_key": "ANTHROPIC_API_KEY",
-        "info_template": "Claude Sonnet · Anthropic · {date} · {time} your city",
+        "info_template": "Claude Sonnet · Anthropic · {date} · {time} {city}",
     },
     {
         "key": "chatty",
@@ -79,7 +79,7 @@ ENGINES = [
         "provider": "openai",
         "model": "gpt-4o",
         "env_key": "OPENAI_API_KEY",
-        "info_template": "GPT-4o · OpenAI · {date} · {time} your city",
+        "info_template": "GPT-4o · OpenAI · {date} · {time} {city}",
     },
 ]
 
@@ -95,7 +95,7 @@ SECTIONS = [
     ("s2", "Quantum Computing"),
     ("s3", "Top Technical Creators (YouTube/X)"),
     ("s4", "Reddit AI & Innovation"),
-    ("s5", "your city Overview (Weather + Traffic)"),
+    ("s5", "Local Overview (Weather + Traffic)"),
     ("s6", "Tech News"),
     ("s7", "Canadian News"),
     ("s8", "World News"),
@@ -106,7 +106,7 @@ SECTIONS = [
 # BRIEFING PROMPT — compact, structured, direct JSON output
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 def build_briefing_prompt(display_date: str, engine_name: str) -> str:
-    return f"""You are a senior intelligence analyst preparing a daily briefing for a tech executive based in your city, Canada. Today is {display_date}.
+    return f"""You are a senior intelligence analyst preparing a daily briefing for a tech executive. Today is {display_date}.
 
 Produce a structured briefing with EXACTLY 8 news sections PLUS 2 LinkedIn post drafts.
 
@@ -115,9 +115,9 @@ NEWS SECTIONS:
 2. Quantum Computing — Top 5 developments in quantum hardware, algorithms, error correction, industry moves
 3. Top Technical Creators — Top 5 notable videos/posts from AI YouTubers and X/Twitter thought leaders ([curated AI creator list])
 4. Reddit AI & Innovation — Top 5 trending posts from r/LocalLLaMA, r/MachineLearning, r/singularity, r/artificial
-5. your city Overview — Item 1: Current weather (temperature, conditions, forecast). Item 2: Traffic conditions (DVP, 401, Gardiner)
+5. Local Overview — Item 1: Current weather (temperature, conditions, forecast). Item 2: Traffic conditions (check local major routes)
 6. Tech News — Top 5 headlines from TechCrunch, The Verge, Ars Technica, Wired, Reuters Tech
-7. Canadian News — Top 5 stories relevant to Canada from CBC, Globe and Mail, your city Star, CTV
+7. National News — Top 5 stories relevant to your country from major national outlets
 8. World News — Top 5 major global stories from Reuters, BBC, AP, Al Jazeera
 
 LINKEDIN POSTS (2 posts based on today's most compelling stories):

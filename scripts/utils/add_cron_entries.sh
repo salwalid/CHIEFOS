@@ -8,7 +8,7 @@ echo "Backup saved."
 
 # Build new crontab
 crontab - << 'CRON'
-PATH=$CHIEFOS_HOME/.local/share/pnpm:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+PATH=$HOME/.local/share/pnpm:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 # All times are UTC. Server is UTC, owner is EST (UTC-5). Add 5hrs to get EST equivalent.
 
 # --- EXISTING (unchanged) ---
@@ -29,7 +29,7 @@ PATH=$CHIEFOS_HOME/.local/share/pnpm:/usr/local/sbin:/usr/local/bin:/usr/sbin:/u
 
 # --- CONTENT ---
 # 9:45am EST = 2:45pm UTC
-45 14 * * 1,3,5 $CHIEFOS_HOME/scripts/reminder_post.sh
+45 14 * * 1,3,5 $CHIEFOS_HOME/scripts/remind_post.sh
 
 # --- PHASE 3: ALERT SCRIPTS ---
 # 5:00am EST = 10:00am UTC

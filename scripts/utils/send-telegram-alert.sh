@@ -15,7 +15,7 @@ MESSAGE=$(cat "$MESSAGE_FILE")
 TELEGRAM_USER_ID="${TELEGRAM_CHAT_ID}"  # Set TELEGRAM_CHAT_ID in config.env
 
 # Send via ChiefOS CLI
-PATH=$CHIEFOS_HOME/.local/share/pnpm:$PATH /usr/bin/chiefos message send \
+PATH=$HOME/.local/share/pnpm:$PATH /usr/bin/chiefos message send \
     --channel telegram \
     --target "$TELEGRAM_USER_ID" \
     --message "$MESSAGE"

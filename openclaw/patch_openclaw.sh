@@ -12,7 +12,7 @@
 #   5. Deploys scripts/, www/HQ/, and database as net-new
 #
 # Usage: bash patch_openclaw.sh [openclaw_dir] [chiefos_dir]
-#   openclaw_dir: path to existing OpenClaw workspace (default: ~/clawd)
+#   openclaw_dir: path to existing OpenClaw workspace (default: ~/chiefos)
 #   chiefos_dir:  path to ChiefOS source (default: current directory)
 #
 # Run this ONLY if preflight.sh detected an existing OpenClaw workspace.
@@ -25,7 +25,7 @@ WARN="⚠️ "
 FAIL="❌"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 
-OPENCLAW_DIR="${1:-$HOME/clawd}"
+OPENCLAW_DIR="${1:-$HOME/chiefos}"
 CHIEFOS_SRC="${2:-.}"
 
 echo ""

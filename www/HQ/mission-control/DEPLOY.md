@@ -5,13 +5,13 @@
 ### Step 1: Upload to VPS
 ```bash
 # From your local machine, SCP the entire folder:
-scp -r mission-control/ root@your-vps:/var/www/your-alpha-domain.com/
+scp -r mission-control/ root@your-vps:/var/www/yourdomain.com/
 
 # OR if you're already on the VPS, just copy it:
-cp -r mission-control/ /var/www/your-alpha-domain.com/
+cp -r mission-control/ /var/www/yourdomain.com/
 ```
 
-Adjust the path to wherever your your-alpha-domain.com web root is.
+Adjust the path to wherever your yourdomain.com web root is.
 
 ### Step 2: Install PyYAML (if not already installed)
 ```bash
@@ -20,7 +20,7 @@ pip3 install pyyaml
 
 ### Step 3: Run the build script
 ```bash
-cd /var/www/your-alpha-domain.com/mission-control
+cd /var/www/yourdomain.com/mission-control
 chmod +x build.sh
 ./build.sh
 ```
@@ -33,9 +33,9 @@ You should see:
 
 ### Step 4: Open in browser
 ```
-https://your-alpha-domain.com/mission-control/team.html
-https://your-alpha-domain.com/mission-control/calendar.html
-https://your-alpha-domain.com/mission-control/office.html
+https://yourdomain.com/mission-control/team.html
+https://yourdomain.com/mission-control/calendar.html
+https://yourdomain.com/mission-control/office.html
 ```
 
 That's it. You're live.
@@ -107,7 +107,7 @@ Edit `schedules/schedules.yaml` — add or modify entries, then run `./build.sh`
 
 Add to your crontab to rebuild every 5 minutes:
 ```bash
-*/5 * * * * cd /var/www/your-alpha-domain.com/mission-control && ./build.sh >> /dev/null 2>&1
+*/5 * * * * cd /var/www/yourdomain.com/mission-control && ./build.sh >> /dev/null 2>&1
 ```
 
 Or use inotifywait for instant rebuilds:

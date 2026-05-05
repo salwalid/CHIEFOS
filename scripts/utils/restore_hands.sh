@@ -39,7 +39,7 @@ pkill -9 chromium >/dev/null 2>&1
 
 # Start the server in the background
 # We use port 18791 as discovered during the repair
-nohup chiefos browser serve --port 18791 --browser-profile clawd > /tmp/clawd-browser.log 2>&1 &
+nohup chiefos browser serve --port 18791 --browser-profile chiefos > /tmp/chiefos-browser.log 2>&1 &
 
 sleep 5
 
@@ -48,7 +48,7 @@ echo "🤝 Verifying handshake..."
 if curl -s http://127.0.0.1:18791/tabs >/dev/null; then
     echo "✅ 'Hands' are live and responding on port 18791."
 else
-    echo "❌ Handshake failed. Check /tmp/clawd-browser.log"
+    echo "❌ Handshake failed. Check /tmp/chiefos-browser.log"
     exit 1
 fi
 

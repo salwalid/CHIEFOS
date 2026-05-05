@@ -163,9 +163,9 @@ fi
 # --- OpenClaw detection ---
 echo ""
 echo "--- Environment Detection ---"
-if [[ -f "${BASE_DIR}/SOUL.md" ]] || [[ -f "${HOME}/clawd/SOUL.md" ]]; then
+if [[ -f "${BASE_DIR}/SOUL.md" ]] || [[ -f "${HOME}/chiefos/SOUL.md" ]]; then
     OPENCLAW_PATH="${BASE_DIR}"
-    [[ -f "${HOME}/clawd/SOUL.md" ]] && OPENCLAW_PATH="${HOME}/clawd"
+    [[ -f "${HOME}/chiefos/SOUL.md" ]] && OPENCLAW_PATH="${HOME}/chiefos"
     echo "${WARN} Existing OpenClaw workspace detected at ${OPENCLAW_PATH}"
     echo "     → Will be updated (not replaced). Backups created before any changes."
     WARNINGS=$((WARNINGS + 1))
